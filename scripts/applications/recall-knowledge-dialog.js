@@ -124,7 +124,7 @@ export class RecallKnowledgeDialog extends HandlebarsApplicationMixin(Applicatio
     const priorRevealedKeys = new Set(getRevealedFacts(combat, actorUuid, targetUuid));
     const alreadyIdentified = isIdentified(combat, actorUuid, targetUuid);
 
-    const reveal = resolveReveal(this.#facts, this.#selectedCategory, degree, priorRevealedKeys);
+    const reveal = resolveReveal(this.#facts, this.#selectedCategory, degree, priorRevealedKeys, alreadyIdentified);
 
     await renderResultChatMessage({
       degree,
