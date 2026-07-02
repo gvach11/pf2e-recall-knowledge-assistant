@@ -38,16 +38,31 @@ export function getActorFacts(actor) {
  */
 export function listCategoryEntries(facts, category) {
   if (category === CATEGORIES.WEAKNESSES) {
-    return facts.weaknesses.map((w) => ({ key: w.type, text: `Weak to ${w.label} ${w.value}` }));
+    return facts.weaknesses.map((w) => ({
+      key: w.type,
+      label: w.label,
+      value: w.value,
+      text: `Weak to ${w.label} ${w.value}`,
+    }));
   }
   if (category === CATEGORIES.RESISTANCES) {
     return [
-      ...facts.resistances.map((r) => ({ key: r.type, text: `Resistant to ${r.label} ${r.value}` })),
-      ...facts.immunities.map((i) => ({ key: i.type, text: `Immune to ${i.label}` })),
+      ...facts.resistances.map((r) => ({
+        key: r.type,
+        label: r.label,
+        value: r.value,
+        text: `Resistant to ${r.label} ${r.value}`,
+      })),
+      ...facts.immunities.map((i) => ({
+        key: i.type,
+        label: i.label,
+        value: undefined,
+        text: `Immune to ${i.label}`,
+      })),
     ];
   }
   if (category === CATEGORIES.TRAITS) {
-    return facts.traits.map((trait) => ({ key: trait, text: trait }));
+    return facts.traits.map((trait) => ({ key: trait, label: trait, value: undefined, text: trait }));
   }
   return [];
 }

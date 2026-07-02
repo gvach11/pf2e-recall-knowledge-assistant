@@ -1,5 +1,12 @@
 import { CATEGORIES, makeFactKey } from "../constants.js";
 import { CREATURE_TRAIT_SKILLS } from "./trait-skill-map.js";
+import { listCategoryEntries } from "../actor-data.js";
+
+// pf2e immunities carry no numeric magnitude, so a false weakness inverted
+// from an immunity has no real value to borrow. This fixed, documented
+// fallback keeps the lie's formatting identical to a real weakness fact
+// (SPEC.md §6.4) without inventing per-level game data we can't verify.
+const FALLBACK_FALSE_VALUE = 5;
 
 /**
  * Picks a random element from an array using the supplied RNG (defaults to
@@ -12,35 +19,36 @@ function pickRandom(list, rng = Math.random) {
 
 /**
  * Falsely claims a weakness to a type the target is actually resistant or
- * immune to (the inversion). Excludes any candidate whose true fact has
- * already been revealed to this character this encounter — a false
- * weakness claim must never contradict a resistance/immunity the character
- * already truthfully knows about. Falls back to nothing if no safe
- * candidate remains.
+ * immune to (the inversion), reusing the real magnitude of the inverted
+ * fact where one exists (resistances) and the fallback value otherwise
+ * (immunities). Excludes any candidate whose true fact has already been
+ * revealed to this character this encounter — a false weakness claim must
+ * never contradict a resistance/immunity the character already truthfully
+ * knows about. Falls back to nothing if no safe candidate remains.
  */
 export function invertToFalseWeakness(facts, revealedKeys = new Set(), rng = Math.random) {
-  const candidates = [
-    ...facts.resistances.map((r) => r.type),
-    ...facts.immunities.map((i) => i.type),
-  ].filter((type) => !revealedKeys.has(makeFactKey(CATEGORIES.RESISTANCES, type)));
-  const type = pickRandom(candidates, rng);
-  if (!type) return null;
-  return { category: CATEGORIES.WEAKNESSES, text: `Weak to ${type}` };
+  const candidates = listCategoryEntries(facts, CATEGORIES.RESISTANCES).filter(
+    (entry) => !revealedKeys.has(makeFactKey(CATEGORIES.RESISTANCES, entry.key))
+  );
+  const entry = pickRandom(candidates, rng);
+  if (!entry) return null;
+  const value = entry.value ?? FALLBACK_FALSE_VALUE;
+  return { category: CATEGORIES.WEAKNESSES, text: `Weak to ${entry.label} ${value}` };
 }
 
 /**
- * Falsely claims a resistance/immunity to a type the target is actually
- * weak to (the inversion). Excludes any candidate whose true fact has
- * already been revealed to this character this encounter. Falls back to
- * nothing if no safe candidate remains.
+ * Falsely claims a resistance to a type the target is actually weak to (the
+ * inversion), reusing the real magnitude of the inverted weakness. Excludes
+ * any candidate whose true fact has already been revealed to this character
+ * this encounter. Falls back to nothing if no safe candidate remains.
  */
 export function invertToFalseResistance(facts, revealedKeys = new Set(), rng = Math.random) {
-  const candidates = facts.weaknesses
-    .map((w) => w.type)
-    .filter((type) => !revealedKeys.has(makeFactKey(CATEGORIES.WEAKNESSES, type)));
-  const type = pickRandom(candidates, rng);
-  if (!type) return null;
-  return { category: CATEGORIES.RESISTANCES, text: `Resistant to ${type}` };
+  const candidates = listCategoryEntries(facts, CATEGORIES.WEAKNESSES).filter(
+    (entry) => !revealedKeys.has(makeFactKey(CATEGORIES.WEAKNESSES, entry.key))
+  );
+  const entry = pickRandom(candidates, rng);
+  if (!entry) return null;
+  return { category: CATEGORIES.RESISTANCES, text: `Resistant to ${entry.label} ${entry.value}` };
 }
 
 /**

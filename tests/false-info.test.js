@@ -12,7 +12,7 @@ const richFacts = {
   name: "Test Ghoul",
   traits: ["undead"],
   weaknesses: [{ type: "fire", value: 5, label: "fire" }],
-  resistances: [{ type: "cold", value: 5, label: "cold" }],
+  resistances: [{ type: "cold", value: 8, label: "cold" }],
   immunities: [{ type: "poison", label: "poison" }],
 };
 
@@ -51,9 +51,16 @@ describe("invertToFalseWeakness", () => {
     expect(invertToFalseWeakness(richFacts, revealedKeys)).toBeNull();
   });
 
-  it("characterization (pre-fix): omits any numeric value or label, unlike a real weakness fact", () => {
+  it("presents a false weakness with the same value/label formatting as a real one, reusing the inverted fact's real magnitude", () => {
     const result = invertToFalseWeakness(richFacts, new Set(), () => 0);
-    expect(result.text).toBe("Weak to cold");
+    expect(result.text).toBe("Weak to cold 8");
+  });
+
+  it("falls back to a fixed representative value when inverting an immunity (which carries no real magnitude)", () => {
+    // Exclude the "cold" resistance so only the "poison" immunity remains.
+    const revealedKeys = new Set([makeFactKey(CATEGORIES.RESISTANCES, "cold")]);
+    const result = invertToFalseWeakness(richFacts, revealedKeys, () => 0);
+    expect(result.text).toBe("Weak to poison 5");
   });
 });
 
@@ -73,9 +80,9 @@ describe("invertToFalseResistance", () => {
     expect(invertToFalseResistance(richFacts, revealedKeys)).toBeNull();
   });
 
-  it("characterization (pre-fix): omits any numeric value or label, unlike a real resistance fact", () => {
+  it("presents a false resistance with the same value/label formatting as a real one, reusing the inverted fact's real magnitude", () => {
     const result = invertToFalseResistance(richFacts, new Set(), () => 0);
-    expect(result.text).toBe("Resistant to fire");
+    expect(result.text).toBe("Resistant to fire 5");
   });
 });
 

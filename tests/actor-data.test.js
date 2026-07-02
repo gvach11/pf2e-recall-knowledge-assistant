@@ -68,15 +68,25 @@ describe("pickFactFromOtherCategory", () => {
 });
 
 describe("listCategoryEntries", () => {
-  it("returns a stable key alongside the display text for each real fact", () => {
+  it("returns a stable key, label, and value alongside the display text for each real fact", () => {
     const entries = listCategoryEntries(facts, CATEGORIES.RESISTANCES);
-    expect(entries).toContainEqual({ key: "cold", text: "Resistant to cold 5" });
-    expect(entries).toContainEqual({ key: "poison", text: "Immune to poison" });
+    expect(entries).toContainEqual({ key: "cold", label: "cold", value: 5, text: "Resistant to cold 5" });
+    expect(entries).toContainEqual({ key: "poison", label: "poison", value: undefined, text: "Immune to poison" });
   });
 
   it("keys weaknesses and traits by their type/slug too", () => {
-    expect(listCategoryEntries(facts, CATEGORIES.WEAKNESSES)).toContainEqual({ key: "fire", text: "Weak to fire 5" });
-    expect(listCategoryEntries(facts, CATEGORIES.TRAITS)).toContainEqual({ key: "ooze", text: "ooze" });
+    expect(listCategoryEntries(facts, CATEGORIES.WEAKNESSES)).toContainEqual({
+      key: "fire",
+      label: "fire",
+      value: 5,
+      text: "Weak to fire 5",
+    });
+    expect(listCategoryEntries(facts, CATEGORIES.TRAITS)).toContainEqual({
+      key: "ooze",
+      label: "ooze",
+      value: undefined,
+      text: "ooze",
+    });
   });
 });
 

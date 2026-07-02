@@ -105,6 +105,10 @@
 - **Explanation:** Real weakness/resistance facts include a numeric value and display label; false facts generated on a critical failure omit both, using the raw type slug with no number. A player could learn "no number = always false" over repeated play, contradicting SPEC.md §6.4's requirement that false info be "presented with the same confidence/formatting as real info."
 - **Evidence:** `scripts/data/false-info.js:28` — `text: \`Weak to ${type}\`` (no value/label) vs. `scripts/actor-data.js:41` — `text: \`Weak to ${w.label} ${w.value}\``.
 - **Found by:** Security & Code Quality specialist; verified.
+- **Status:** Fixed
+- **Status reason:** `invertToFalseWeakness`/`invertToFalseResistance` now format false facts identically to real ones (`"Weak to <label> <value>"`), reusing the real numeric value of the inverted fact where one exists (resistance→false-weakness, weakness→false-resistance), falling back to a documented constant (`FALLBACK_FALSE_VALUE = 5`) only when inverting an immunity (which has no magnitude in pf2e). Fixed together with F12 since both required sourcing candidates via `listCategoryEntries`.
+- **Status date:** 2026-07-02
+- **Status commit:** pending (see fix-architecture session commit)
 
 ### [F4] `#onRollSkill` has no re-entrancy guard and no error isolation across its multi-step, non-atomic sequence
 - **Category:** Flaw 19 (Lack of idempotency) — also touches Flaw 26 (poor transactional boundaries), Flaw 27 (temporal coupling), Flaw 12 (hidden side effects)
@@ -168,6 +172,10 @@
 - **Explanation:** `invertToFalseWeakness`/`invertToFalseResistance` manually map over raw `facts.resistances`/`facts.immunities`/`facts.weaknesses` instead of calling the existing `listCategoryEntries(facts, category)` abstraction already used elsewhere (e.g. `reveal.js`) — partial, inconsistent adoption of the category abstraction.
 - **Evidence:** `scripts/data/false-info.js:22-25` vs. `scripts/actor-data.js:39-53` (`listCategoryEntries`).
 - **Found by:** Coupling & Dependencies specialist; verified.
+- **Status:** Fixed
+- **Status reason:** `invertToFalseWeakness`/`invertToFalseResistance` now source candidates via `listCategoryEntries(facts, category)` instead of manually mapping raw `facts.resistances`/`facts.immunities`/`facts.weaknesses`. `listCategoryEntries` was extended (additively) to also return `label`/`value` per entry, which false-info.js needed anyway for the F3 fix.
+- **Status date:** 2026-07-02
+- **Status commit:** pending (see fix-architecture session commit)
 
 ### [F13] `computeHiddenDC` called twice independently per roll cycle
 - **Category:** Flaw 13 (Inconsistent boundaries)
