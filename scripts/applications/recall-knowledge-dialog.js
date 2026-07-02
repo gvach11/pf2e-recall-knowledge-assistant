@@ -1,10 +1,8 @@
 import { CATEGORIES, MODULE_ID } from "../constants.js";
 import { getActorFacts, getRelevantSkills } from "../actor-data.js";
-import { computeHiddenDC, computeDegreeOfSuccess, computeLikelihood } from "../data/dc-table.js";
-import { rollRecallKnowledge } from "../roll.js";
-import { isAttemptBlocked, isIdentified, getRevealedFacts, recordAttempt } from "../repeat-attempts.js";
-import { resolveReveal } from "../reveal.js";
-import { renderResultChatMessage } from "../chat/render-result.js";
+import { computeHiddenDC, computeLikelihood } from "../data/dc-table.js";
+import { isAttemptBlocked } from "../repeat-attempts.js";
+import { executeRollSequence } from "../roll-sequence.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -94,50 +92,16 @@ export class RecallKnowledgeDialog extends HandlebarsApplicationMixin(Applicatio
   static async #onRollSkill(event) {
     if (!this.#selectedSkill) return;
 
-    const combat = game.combat ?? null;
-    const actorUuid = this.#rollingActor.uuid;
-    const targetUuid = this.#targetActor.uuid;
-
-    if (isAttemptBlocked(combat, actorUuid, targetUuid)) {
-      ui.notifications.warn(game.i18n.localize("RKA.Warning.AlreadyAttempted"));
-      return;
-    }
-
-    const rollResult = await rollRecallKnowledge({
+    const result = await executeRollSequence({
+      combat: game.combat ?? null,
       rollingActor: this.#rollingActor,
       targetActor: this.#targetActor,
-      statistic: this.#selectedSkill,
+      facts: this.#facts,
+      selectedSkill: this.#selectedSkill,
+      selectedCategory: this.#selectedCategory,
       event,
     });
 
-    if (!rollResult) {
-      ui.notifications.error(game.i18n.localize("RKA.Error.RollFailed"));
-      return;
-    }
-
-    const dc = computeHiddenDC(this.#targetActor);
-    const degree = computeDegreeOfSuccess(rollResult.rollTotal, dc, rollResult.naturalD20);
-
-    // Prior knowledge this character already has about this target this
-    // encounter — used so a critical failure never contradicts an
-    // already-revealed true fact, and so identity stays known once earned.
-    const priorRevealedKeys = new Set(getRevealedFacts(combat, actorUuid, targetUuid));
-    const alreadyIdentified = isIdentified(combat, actorUuid, targetUuid);
-
-    const reveal = resolveReveal(this.#facts, this.#selectedCategory, degree, priorRevealedKeys, alreadyIdentified);
-
-    await renderResultChatMessage({
-      degree,
-      dc,
-      rollTotal: rollResult.rollTotal,
-      rollingActor: this.#rollingActor,
-      targetActor: this.#targetActor,
-      alreadyIdentified,
-      reveal,
-    });
-
-    await recordAttempt(combat, actorUuid, targetUuid, degree, reveal.revealedKeys);
-
-    this.close();
+    if (result.outcome === "completed") this.close();
   }
 }

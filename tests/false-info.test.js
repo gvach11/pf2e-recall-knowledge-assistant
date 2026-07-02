@@ -50,6 +50,11 @@ describe("invertToFalseWeakness", () => {
     ]);
     expect(invertToFalseWeakness(richFacts, revealedKeys)).toBeNull();
   });
+
+  it("characterization (pre-fix): omits any numeric value or label, unlike a real weakness fact", () => {
+    const result = invertToFalseWeakness(richFacts, new Set(), () => 0);
+    expect(result.text).toBe("Weak to cold");
+  });
 });
 
 describe("invertToFalseResistance", () => {
@@ -66,6 +71,11 @@ describe("invertToFalseResistance", () => {
   it("excludes a candidate whose true fact has already been revealed to this character", () => {
     const revealedKeys = new Set([makeFactKey(CATEGORIES.WEAKNESSES, "fire")]);
     expect(invertToFalseResistance(richFacts, revealedKeys)).toBeNull();
+  });
+
+  it("characterization (pre-fix): omits any numeric value or label, unlike a real resistance fact", () => {
+    const result = invertToFalseResistance(richFacts, new Set(), () => 0);
+    expect(result.text).toBe("Resistant to fire");
   });
 });
 
