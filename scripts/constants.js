@@ -1,4 +1,4 @@
-export const MODULE_ID = "recall-knowledge-assistant";
+export const MODULE_ID = "pf2e-recall-knowledge-assistant";
 
 export const CATEGORIES = Object.freeze({
   WEAKNESSES: "weaknesses",

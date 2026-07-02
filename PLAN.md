@@ -65,7 +65,7 @@ in the spec and is now fully resolved with a concrete API call.
 ## File Layout
 
 ```
-recall-knowledge-assistant/
+pf2e-recall-knowledge-assistant/
 ├── module.json
 ├── package.json                          # vitest devDependency + "test" script only
 ├── scripts/
@@ -86,7 +86,7 @@ recall-knowledge-assistant/
 │   └── ui/scene-control.js               # getSceneControlButtons hook
 ├── templates/{dialog.hbs, chat-result.hbs}
 ├── lang/en.json
-├── styles/recall-knowledge-assistant.css
+├── styles/pf2e-recall-knowledge-assistant.css
 └── tests/                                # vitest specs for scripts/data/*
 ```
 
@@ -94,7 +94,7 @@ All cross-file wiring uses plain ES module `import`/`export` (e.g.
 `scripts/module.js` does `import { registerSceneControl } from "./ui/scene-control.js";`)
 — no bundler resolves these, Foundry/the browser load them natively at runtime.
 
-`module.json`: id `recall-knowledge-assistant`, `compatibility.minimum/verified/maximum: "14"`,
+`module.json`: id `pf2e-recall-knowledge-assistant`, `compatibility.minimum/verified/maximum: "14"`,
 `relationships.systems: [{ id: "pf2e", type: "system" }]`, `esmodules: ["scripts/module.js"]`,
 `styles`, `languages`.
 

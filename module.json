@@ -1,6 +1,6 @@
 {
-  "id": "recall-knowledge-assistant",
-  "title": "Recall Knowledge Assistant",
+  "id": "pf2e-recall-knowledge-assistant",
+  "title": "PF2e Recall Knowledge Assistant",
   "description": "Streamlines PF2e's Recall Knowledge action: target an enemy, pick a category, roll, and get a scoped reveal with the DC always hidden.",
   "version": "0.1.0",
   "authors": [
@@ -28,7 +28,7 @@
     "scripts/module.js"
   ],
   "styles": [
-    "styles/recall-knowledge-assistant.css"
+    "styles/pf2e-recall-knowledge-assistant.css"
   ],
   "languages": [
     {

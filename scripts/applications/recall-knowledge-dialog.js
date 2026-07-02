@@ -25,8 +25,8 @@ export class RecallKnowledgeDialog extends HandlebarsApplicationMixin(Applicatio
   }
 
   static DEFAULT_OPTIONS = {
-    id: "recall-knowledge-assistant-dialog",
-    classes: ["recall-knowledge-assistant"],
+    id: "pf2e-recall-knowledge-assistant-dialog",
+    classes: ["pf2e-recall-knowledge-assistant"],
     tag: "div",
     window: {
       title: "RKA.Dialog.Title",
