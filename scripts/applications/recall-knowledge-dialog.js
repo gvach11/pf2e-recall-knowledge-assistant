@@ -13,6 +13,7 @@ export class RecallKnowledgeDialog extends HandlebarsApplicationMixin(Applicatio
   #facts;
   #selectedCategory = CATEGORIES.WEAKNESSES;
   #selectedSkill = null;
+  #isRolling = false;
 
   constructor({ targetToken, rollingActor }, options = {}) {
     super(options);
@@ -90,18 +91,23 @@ export class RecallKnowledgeDialog extends HandlebarsApplicationMixin(Applicatio
   }
 
   static async #onRollSkill(event) {
-    if (!this.#selectedSkill) return;
+    if (!this.#selectedSkill || this.#isRolling) return;
 
-    const result = await executeRollSequence({
-      combat: game.combat ?? null,
-      rollingActor: this.#rollingActor,
-      targetActor: this.#targetActor,
-      facts: this.#facts,
-      selectedSkill: this.#selectedSkill,
-      selectedCategory: this.#selectedCategory,
-      event,
-    });
+    this.#isRolling = true;
+    try {
+      const result = await executeRollSequence({
+        combat: game.combat ?? null,
+        rollingActor: this.#rollingActor,
+        targetActor: this.#targetActor,
+        facts: this.#facts,
+        selectedSkill: this.#selectedSkill,
+        selectedCategory: this.#selectedCategory,
+        event,
+      });
 
-    if (result.outcome === "completed") this.close();
+      if (result.outcome === "completed") this.close();
+    } finally {
+      this.#isRolling = false;
+    }
   }
 }

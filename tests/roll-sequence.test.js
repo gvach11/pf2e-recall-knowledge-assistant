@@ -41,15 +41,19 @@ function baseArgs(overrides = {}) {
 }
 
 describe("executeRollSequence", () => {
+  let consoleErrorSpy;
+
   beforeEach(() => {
     vi.stubGlobal("ui", { notifications: { warn: vi.fn(), error: vi.fn() } });
     vi.stubGlobal("game", { i18n: { localize: (key) => key } });
     rollRecallKnowledge.mockReset();
     renderResultChatMessage.mockReset();
+    consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
   });
 
   afterEach(() => {
     vi.unstubAllGlobals();
+    consoleErrorSpy.mockRestore();
   });
 
   it("returns 'blocked' and warns without rolling when the attempt is already throttled", async () => {
@@ -90,19 +94,37 @@ describe("executeRollSequence", () => {
     expect(stored[attemptKey(ROLLING_ACTOR.uuid, TARGET_ACTOR.uuid)].lastDegree).toBe(DEGREES.SUCCESS);
   });
 
-  it("characterization (pre-fix): a rejected roll propagates as an unhandled rejection instead of being caught", async () => {
-    rollRecallKnowledge.mockRejectedValue(new Error("user cancelled the roll prompt"));
+  it("catches a rejected roll, notifies the user, and does not throw", async () => {
+    const error = new Error("user cancelled the roll prompt");
+    rollRecallKnowledge.mockRejectedValue(error);
 
-    await expect(executeRollSequence(baseArgs())).rejects.toThrow("user cancelled the roll prompt");
-    expect(ui.notifications.error).not.toHaveBeenCalled();
+    const result = await executeRollSequence(baseArgs());
+
+    expect(result).toEqual({ outcome: "error" });
+    expect(ui.notifications.error).toHaveBeenCalledWith("RKA.Error.RollFailed");
+    expect(consoleErrorSpy).toHaveBeenCalledWith(error);
   });
 
-  it("characterization (pre-fix): a failure creating the chat message propagates unhandled and skips recordAttempt", async () => {
+  it("catches a failure creating the chat message, notifies the user, and skips recordAttempt", async () => {
     rollRecallKnowledge.mockResolvedValue({ rollTotal: 25, naturalD20: 12 });
-    renderResultChatMessage.mockRejectedValue(new Error("ChatMessage.create failed"));
+    const error = new Error("ChatMessage.create failed");
+    renderResultChatMessage.mockRejectedValue(error);
     const combat = createFakeCombat();
 
-    await expect(executeRollSequence(baseArgs({ combat }))).rejects.toThrow("ChatMessage.create failed");
+    const result = await executeRollSequence(baseArgs({ combat }));
+
+    expect(result).toEqual({ outcome: "error" });
+    expect(ui.notifications.error).toHaveBeenCalledWith("RKA.Error.RollFailed");
     expect(combat.getFlag("pf2e-recall-knowledge-assistant", "attempts")).toBeUndefined();
+  });
+
+  it("catches roll.js's thrown error when pf2e's recall-knowledge action is unavailable", async () => {
+    const error = new Error("pf2e's built-in recall-knowledge action is unavailable");
+    rollRecallKnowledge.mockRejectedValue(error);
+
+    const result = await executeRollSequence(baseArgs());
+
+    expect(result).toEqual({ outcome: "error" });
+    expect(ui.notifications.error).toHaveBeenCalledWith("RKA.Error.RollFailed");
   });
 });

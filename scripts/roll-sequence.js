@@ -27,37 +27,43 @@ export async function executeRollSequence({
     return { outcome: "blocked" };
   }
 
-  const rollResult = await rollRecallKnowledge({
-    rollingActor,
-    targetActor,
-    statistic: selectedSkill,
-    event,
-  });
+  try {
+    const rollResult = await rollRecallKnowledge({
+      rollingActor,
+      targetActor,
+      statistic: selectedSkill,
+      event,
+    });
 
-  if (!rollResult) {
+    if (!rollResult) {
+      ui.notifications.error(game.i18n.localize("RKA.Error.RollFailed"));
+      return { outcome: "no-roll" };
+    }
+
+    const dc = computeHiddenDC(targetActor);
+    const degree = computeDegreeOfSuccess(rollResult.rollTotal, dc, rollResult.naturalD20);
+
+    const priorRevealedKeys = new Set(getRevealedFacts(combat, actorUuid, targetUuid));
+    const alreadyIdentified = isIdentified(combat, actorUuid, targetUuid);
+
+    const reveal = resolveReveal(facts, selectedCategory, degree, priorRevealedKeys, alreadyIdentified);
+
+    await renderResultChatMessage({
+      degree,
+      dc,
+      rollTotal: rollResult.rollTotal,
+      rollingActor,
+      targetActor,
+      alreadyIdentified,
+      reveal,
+    });
+
+    await recordAttempt(combat, actorUuid, targetUuid, degree, reveal.revealedKeys);
+
+    return { outcome: "completed", degree };
+  } catch (error) {
+    console.error(error);
     ui.notifications.error(game.i18n.localize("RKA.Error.RollFailed"));
-    return { outcome: "no-roll" };
+    return { outcome: "error" };
   }
-
-  const dc = computeHiddenDC(targetActor);
-  const degree = computeDegreeOfSuccess(rollResult.rollTotal, dc, rollResult.naturalD20);
-
-  const priorRevealedKeys = new Set(getRevealedFacts(combat, actorUuid, targetUuid));
-  const alreadyIdentified = isIdentified(combat, actorUuid, targetUuid);
-
-  const reveal = resolveReveal(facts, selectedCategory, degree, priorRevealedKeys, alreadyIdentified);
-
-  await renderResultChatMessage({
-    degree,
-    dc,
-    rollTotal: rollResult.rollTotal,
-    rollingActor,
-    targetActor,
-    alreadyIdentified,
-    reveal,
-  });
-
-  await recordAttempt(combat, actorUuid, targetUuid, degree, reveal.revealedKeys);
-
-  return { outcome: "completed", degree };
 }

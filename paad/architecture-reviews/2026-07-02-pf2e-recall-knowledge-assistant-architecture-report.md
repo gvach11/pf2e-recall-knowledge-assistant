@@ -116,6 +116,10 @@
 - **Explanation:** A single method chains roll → compute degree → resolve reveal → create two chat messages → read-modify-write a Combat flag → close dialog, with no button-disable/in-flight guard against a fast double-click firing the roll twice, and no try/catch anywhere in the chain — a failure between chat-message creation and the flag write desyncs visible chat state from GM-tracked throttle/identification state with no recovery path. Independently flagged from four different angles by three specialists, consolidated here as one root cause.
 - **Evidence:** `scripts/applications/recall-knowledge-dialog.js:94-142` (no try/catch across the whole method); `scripts/repeat-attempts.js:72-87` (`recordAttempt`'s read-modify-write with no lock).
 - **Found by:** Coupling & Dependencies, Integration & Data, Error Handling & Observability specialists (4-way cross-specialist agreement); verified.
+- **Status:** Fixed
+- **Status reason:** The roll/reveal/chat/record sequence was extracted from `#onRollSkill` into a standalone, testable `executeRollSequence` (`scripts/roll-sequence.js`) and wrapped in try/catch — any failure across the chain now resolves to `{ outcome: "error" }`, notifies the user via `ui.notifications.error`, and logs via `console.error` instead of desyncing chat state from GM-tracked flags with no recovery path. A private `#isRolling` guard on `RecallKnowledgeDialog`, checked/reset around the call, prevents a fast double-click from firing the sequence twice concurrently.
+- **Status date:** 2026-07-02
+- **Status commit:** pending (see fix-architecture session commit)
 
 ### [F5] `rollRecallKnowledge` failure paths are unguarded and can throw or silently misclassify a rejection
 - **Category:** Flaw 20 (Weak error handling strategy)
@@ -123,6 +127,10 @@
 - **Explanation:** `roll.js` throws a raw, unlocalized `Error` if `game.pf2e.actions.get("recall-knowledge")` is unavailable, and the `action.use(...)` call itself is also unguarded — a rejection (e.g. the user cancelling pf2e's own roll prompt) is indistinguishable from and not caught by the existing "resolved but malformed" branch. The caller awaits with no try/catch, so a thrown error becomes an unhandled promise rejection with no user feedback, unlike the sibling `!rollResult` branch which correctly shows `ui.notifications.error`.
 - **Evidence:** `scripts/roll.js:11-13` — `if (!action) { throw new Error(...); }`; `scripts/applications/recall-knowledge-dialog.js:106` — `const rollResult = await rollRecallKnowledge({...})` with no surrounding try/catch.
 - **Found by:** Error Handling & Observability specialist; verified.
+- **Status:** Fixed
+- **Status reason:** Fixed together with F4 — `executeRollSequence`'s try/catch now catches both `roll.js`'s thrown Error (missing action) and a rejected `action.use()` (e.g. user cancels the roll prompt) uniformly, surfacing `RKA.Error.RollFailed` to the user in both cases instead of an unhandled promise rejection.
+- **Status date:** 2026-07-02
+- **Status commit:** pending (see fix-architecture session commit)
 
 ### [F6] Zero logging/observability anywhere in the module
 - **Category:** Flaw 21 (No observability plan) — also touches Flaw 34 (inconsistent error/logging conventions)
