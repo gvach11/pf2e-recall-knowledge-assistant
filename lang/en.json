@@ -1,0 +1,46 @@
+{
+  "RKA": {
+    "SceneControl": {
+      "Title": "Recall Knowledge"
+    },
+    "UnknownTarget": "Unknown Creature",
+    "Dialog": {
+      "Title": "Recall Knowledge",
+      "CategoryHeading": "What are you trying to recall?",
+      "SkillHeading": "Choose a skill",
+      "RollButton": "Roll"
+    },
+    "Category": {
+      "weaknesses": "Weaknesses",
+      "resistances": "Resistances / Immunities",
+      "traits": "Traits"
+    },
+    "Likelihood": {
+      "confident": "Confident",
+      "uncertain": "Uncertain",
+      "unfamiliar": "Unfamiliar"
+    },
+    "Degree": {
+      "criticalSuccess": "Critical Success",
+      "success": "Success",
+      "failure": "Failure",
+      "criticalFailure": "Critical Failure"
+    },
+    "Chat": {
+      "Title": "Recall Knowledge",
+      "GmDetailTitle": "Recall Knowledge (GM only)",
+      "NothingNotable": "Nothing notable in that regard.",
+      "NothingRecalled": "You recall nothing certain."
+    },
+    "Warning": {
+      "NoTarget": "Target exactly one creature or hazard first.",
+      "MultipleTargets": "Target exactly one creature or hazard — you have more than one targeted.",
+      "InvalidTargetType": "Recall Knowledge can only be used on creatures or hazards.",
+      "NoRollingActor": "You don't have a character assigned to roll with.",
+      "AlreadyAttempted": "You've learned what you're going to learn about this creature for now."
+    },
+    "Error": {
+      "RollFailed": "The Recall Knowledge roll couldn't be completed."
+    }
+  }
+}

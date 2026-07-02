@@ -1,0 +1,43 @@
+<div class="rka-dialog">
+  <header class="rka-target">
+    <img src="{{targetImg}}" alt="{{targetName}}" />
+    <h2>{{targetName}}</h2>
+  </header>
+
+  {{#if blocked}}
+    <p class="rka-blocked-warning">{{localize "RKA.Warning.AlreadyAttempted"}}</p>
+  {{else}}
+    <section class="rka-categories">
+      <h3>{{localize "RKA.Dialog.CategoryHeading"}}</h3>
+      <div class="rka-category-list">
+        {{#each categories}}
+          <label class="rka-category-option {{#if this.selected}}selected{{/if}}">
+            <input type="radio" name="category" value="{{this.key}}" {{#if this.selected}}checked{{/if}}
+                   data-action="selectCategory" data-category="{{this.key}}" />
+            {{this.label}}
+          </label>
+        {{/each}}
+      </div>
+    </section>
+
+    <section class="rka-skills">
+      <h3>{{localize "RKA.Dialog.SkillHeading"}}</h3>
+      <div class="rka-skill-list">
+        {{#each skills}}
+          <label class="rka-skill-option rka-likelihood-{{this.likelihood}} {{#if this.selected}}selected{{/if}}">
+            <input type="radio" name="skill" value="{{this.slug}}" {{#if this.selected}}checked{{/if}}
+                   data-action="selectSkill" data-skill="{{this.slug}}" />
+            <span class="rka-skill-label">{{this.label}}</span>
+            <span class="rka-likelihood-badge">{{localize (concat "RKA.Likelihood." this.likelihood)}}</span>
+          </label>
+        {{/each}}
+      </div>
+    </section>
+
+    <footer class="rka-actions">
+      <button type="button" data-action="rollSkill" {{#unless canRoll}}disabled{{/unless}}>
+        {{localize "RKA.Dialog.RollButton"}}
+      </button>
+    </footer>
+  {{/if}}
+</div>

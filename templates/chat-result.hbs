@@ -1,0 +1,21 @@
+<div class="rka-chat-result rka-degree-{{degree}}">
+  <header>
+    <strong>{{localize "RKA.Chat.Title"}}</strong> — {{targetName}}
+  </header>
+
+  {{#if baseline}}
+    <p class="rka-baseline">{{baseline}}</p>
+  {{/if}}
+
+  {{#if facts.length}}
+    <ul class="rka-facts">
+      {{#each facts}}
+        <li>{{this}}</li>
+      {{/each}}
+    </ul>
+  {{else if baseline}}
+    <p class="rka-nothing-notable">{{localize "RKA.Chat.NothingNotable"}}</p>
+  {{else}}
+    <p class="rka-nothing-recalled">{{localize "RKA.Chat.NothingRecalled"}}</p>
+  {{/if}}
+</div>

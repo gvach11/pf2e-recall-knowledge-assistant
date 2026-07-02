@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell([Environment]::GetEnvironmentVariable\\(\"Path\",\"User\"\\) -split ';' | Select-String \"npm\")",
+      "WebSearch",
+      "WebFetch(domain:2e.aonprd.com)",
+      "Bash(npm test *)",
+      "Bash(node -e \"console.log\\(JSON.stringify\\(JSON.parse\\(require\\('fs'\\).readFileSync\\('module.json','utf8'\\)\\), null, 2\\)\\)\")",
+      "Bash(powershell.exe -NoProfile -Command 'Get-Process | Where-Object { $_.ProcessName -like '\\\\''*Foundry*'\\\\'' } | Select-Object ProcessName, Id, StartTime')",
+      "WebFetch(domain:github.com)"
+    ]
+  }
+}
