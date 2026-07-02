@@ -49,5 +49,6 @@ export async function renderResultChatMessage({
     speaker,
     content: gmContent,
     whisper: ChatMessage.getWhisperRecipients("GM").map((user) => user.id),
+    blind: true,
   });
 }

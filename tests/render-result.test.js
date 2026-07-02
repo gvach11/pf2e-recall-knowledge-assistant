@@ -65,9 +65,9 @@ describe("renderResultChatMessage", () => {
     expect(gmMessage.content).toContain("Roll 30");
   });
 
-  it("characterization (pre-fix): the GM-only message does not set blind, so its own author can see it", async () => {
+  it("sets blind on the GM-only message so its own author (the rolling player) can't see the true DC/roll/degree", async () => {
     await renderResultChatMessage(baseArgs());
     const gmMessage = createCalls[1];
-    expect(gmMessage.blind).toBeUndefined();
+    expect(gmMessage.blind).toBe(true);
   });
 });
