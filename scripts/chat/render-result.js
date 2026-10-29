@@ -28,10 +28,18 @@ export async function renderResultChatMessage({
       ? targetActor.name
       : game.i18n.localize("RKA.UnknownTarget");
 
+  const baseline = reveal.baseline
+    ? game.i18n.format("RKA.Chat.Baseline", {
+        name: reveal.baseline.name,
+        article: /^[aeiou]/i.test(reveal.baseline.trait) ? "an" : "a",
+        trait: reveal.baseline.trait,
+      })
+    : null;
+
   const content = await foundry.applications.handlebars.renderTemplate(TEMPLATE_PATH, {
     targetName: headerName,
     degree,
-    baseline: reveal.baseline,
+    baseline,
     facts: reveal.facts,
   });
 

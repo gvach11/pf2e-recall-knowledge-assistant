@@ -13,7 +13,7 @@ function baseArgs(overrides = {}) {
     rollingActor: ROLLING_ACTOR,
     targetActor: TARGET_ACTOR,
     alreadyIdentified: false,
-    reveal: { baseline: "Test Ghoul is an undead.", facts: ["Weak to fire 5"], isFalse: false, revealedKeys: ["weaknesses:fire"] },
+    reveal: { baseline: { name: "Test Ghoul", trait: "undead" }, facts: ["Weak to fire 5"], isFalse: false, revealedKeys: ["weaknesses:fire"] },
     ...overrides,
   };
 }
@@ -26,7 +26,12 @@ describe("renderResultChatMessage", () => {
     createCalls = [];
     renderTemplateSpy = vi.fn().mockResolvedValue("<div>rendered</div>");
 
-    vi.stubGlobal("game", { i18n: { localize: (key) => key } });
+    vi.stubGlobal("game", {
+      i18n: {
+        localize: (key) => key,
+        format: (key, data) => `${key}|${data.name}|${data.article}|${data.trait}`,
+      },
+    });
     vi.stubGlobal("foundry", { applications: { handlebars: { renderTemplate: renderTemplateSpy } } });
     vi.stubGlobal("ChatMessage", {
       getSpeaker: vi.fn(() => ({ alias: "Rolling PC" })),
@@ -69,5 +74,26 @@ describe("renderResultChatMessage", () => {
     await renderResultChatMessage(baseArgs());
     const gmMessage = createCalls[1];
     expect(gmMessage.blind).toBe(true);
+  });
+
+  it("formats the baseline via game.i18n.format with 'an' before a vowel-led trait", async () => {
+    await renderResultChatMessage(baseArgs({ reveal: { baseline: { name: "Test Ghoul", trait: "undead" }, facts: [] } }));
+    expect(renderTemplateSpy).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({ baseline: "RKA.Chat.Baseline|Test Ghoul|an|undead" })
+    );
+  });
+
+  it("formats the baseline via game.i18n.format with 'a' before a consonant-led trait", async () => {
+    await renderResultChatMessage(baseArgs({ reveal: { baseline: { name: "Test Ghoul", trait: "humanoid" }, facts: [] } }));
+    expect(renderTemplateSpy).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({ baseline: "RKA.Chat.Baseline|Test Ghoul|a|humanoid" })
+    );
+  });
+
+  it("passes a null baseline through unformatted when there is nothing to reveal", async () => {
+    await renderResultChatMessage(baseArgs({ degree: DEGREES.FAILURE, reveal: { baseline: null, facts: [] } }));
+    expect(renderTemplateSpy).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({ baseline: null }));
   });
 });

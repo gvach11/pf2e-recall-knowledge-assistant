@@ -25,6 +25,12 @@ import { generateFalseInfo } from "./data/false-info.js";
  * Returns `{ baseline, facts, isFalse, revealedKeys }`, where the returned
  * `revealedKeys` are the *new* true-fact keys earned by this attempt only
  * (empty for Failure/Critical Failure), for the caller to persist.
+ *
+ * `baseline` is `{ name, trait }` structured data, not a formatted sentence
+ * — this module has no Foundry globals (see architecture report S7), so
+ * composing the actual display string (including `game.i18n` and the
+ * language-specific "a"/"an" article) is left to the presentation layer
+ * (see `chat/render-result.js`).
  */
 export function resolveReveal(facts, category, degree, revealedKeys = new Set(), alreadyIdentified = false, rng = Math.random) {
   if (degree === DEGREES.CRITICAL_FAILURE && !alreadyIdentified) {
@@ -41,7 +47,7 @@ export function resolveReveal(facts, category, degree, revealedKeys = new Set(),
   }
 
   const primaryTrait = facts.traits[0] ?? "creature";
-  const baseline = `${facts.name} is a${/^[aeiou]/i.test(primaryTrait) ? "n" : ""} ${primaryTrait}.`;
+  const baseline = { name: facts.name, trait: primaryTrait };
 
   const usedCategories = [category];
   let primaryEntry = pickCategoryEntry(facts, category, rng);

@@ -18,7 +18,7 @@ describe("resolveReveal", () => {
 
   it("success includes a baseline and one fact, and records that fact's key", () => {
     const reveal = resolveReveal(facts, CATEGORIES.WEAKNESSES, DEGREES.SUCCESS, new Set(), false, () => 0);
-    expect(reveal.baseline).toContain("Test Ghoul");
+    expect(reveal.baseline).toEqual({ name: "Test Ghoul", trait: "undead" });
     expect(reveal.facts).toEqual(["Weak to fire 5"]);
     expect(reveal.revealedKeys).toEqual([makeFactKey(CATEGORIES.WEAKNESSES, "fire")]);
     expect(reveal.isFalse).toBe(false);
@@ -56,24 +56,7 @@ describe("resolveReveal", () => {
   it("success on an empty category still gives the baseline, with no facts", () => {
     const emptyFacts = { name: "Blank", traits: [], weaknesses: [], resistances: [], immunities: [] };
     const reveal = resolveReveal(emptyFacts, CATEGORIES.WEAKNESSES, DEGREES.SUCCESS, new Set(), false);
-    expect(reveal.baseline).toContain("Blank");
+    expect(reveal.baseline).toEqual({ name: "Blank", trait: "creature" });
     expect(reveal.facts).toEqual([]);
-  });
-
-  it("characterization: baseline uses 'a' before a consonant-led trait", () => {
-    const consonantFacts = { ...facts, traits: ["humanoid"] };
-    const reveal = resolveReveal(consonantFacts, CATEGORIES.WEAKNESSES, DEGREES.SUCCESS, new Set(), false);
-    expect(reveal.baseline).toBe("Test Ghoul is a humanoid.");
-  });
-
-  it("characterization: baseline uses 'an' before a vowel-led trait", () => {
-    const reveal = resolveReveal(facts, CATEGORIES.WEAKNESSES, DEGREES.SUCCESS, new Set(), false);
-    expect(reveal.baseline).toBe("Test Ghoul is an undead.");
-  });
-
-  it("characterization: baseline falls back to 'creature' when no traits exist", () => {
-    const noTraitFacts = { ...facts, traits: [] };
-    const reveal = resolveReveal(noTraitFacts, CATEGORIES.WEAKNESSES, DEGREES.SUCCESS, new Set(), false);
-    expect(reveal.baseline).toBe("Test Ghoul is a creature.");
   });
 });

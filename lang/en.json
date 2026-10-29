@@ -28,6 +28,7 @@
     },
     "Chat": {
       "Title": "Recall Knowledge",
+      "Baseline": "{name} is {article} {trait}.",
       "GmDetailTitle": "Recall Knowledge (GM only)",
       "NothingNotable": "Nothing notable in that regard.",
       "NothingRecalled": "You recall nothing certain."

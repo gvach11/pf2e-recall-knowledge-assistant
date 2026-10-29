@@ -229,6 +229,10 @@
 - **Explanation:** The domain-logic module builds the actual display sentence (including manual "a"/"an" grammar) directly, unlike every other user-facing string in the module, which goes through `game.i18n.localize` and `lang/en.json`. Breaks localizability for non-English Foundry installs.
 - **Evidence:** `scripts/reveal.js:44` — `` `${facts.name} is a${/^[aeiou]/i.test(primaryTrait) ? "n" : ""} ${primaryTrait}.` ``.
 - **Found by:** Error Handling & Observability specialist; verified.
+- **Status:** Fixed
+- **Status reason:** `resolveReveal` now returns `baseline: { name, trait }` structured data instead of a pre-built sentence, keeping `reveal.js` Foundry-free (preserving S7). The actual sentence — including the "a"/"an" article and routing through `game.i18n.format` with a new `RKA.Chat.Baseline` key (`lang/en.json`) — is composed in `render-result.js`, which already does `game.i18n` work. This also narrows F14's implicit-contract surface (one less raw field crossing the reveal-object boundary unformatted) and incidentally addresses the Flaw-25 angle (presentation logic was in the domain layer).
+- **Status date:** 2026-10-29
+- **Status commit:** pending (see fix-architecture session commit)
 
 ## Coverage Checklist
 
