@@ -68,11 +68,13 @@ function clampLevel(level) {
  * natural-20-up / natural-1-down step rule ourselves (since we deliberately
  * never hand the DC to pf2e's own action, we don't get its computed outcome).
  */
+const CRITICAL_STEP_MARGIN = 10;
+
 export function computeDegreeOfSuccess(rollTotal, dc, naturalD20) {
   let degree;
-  if (rollTotal >= dc + 10) degree = DEGREES.CRITICAL_SUCCESS;
+  if (rollTotal >= dc + CRITICAL_STEP_MARGIN) degree = DEGREES.CRITICAL_SUCCESS;
   else if (rollTotal >= dc) degree = DEGREES.SUCCESS;
-  else if (rollTotal <= dc - 10) degree = DEGREES.CRITICAL_FAILURE;
+  else if (rollTotal <= dc - CRITICAL_STEP_MARGIN) degree = DEGREES.CRITICAL_FAILURE;
   else degree = DEGREES.FAILURE;
 
   if (naturalD20 === 20) degree = stepUp(degree);
