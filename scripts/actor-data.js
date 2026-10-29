@@ -13,6 +13,12 @@ export function getActorFacts(actor) {
   // ("physical 15 (except adamantine)"), so true reveals print it as-is
   // (`fullLabel`). `label` here is the bare type name, which false info
   // builds its own text from.
+  //
+  // `invertible` says whether a critical-failure lie may flip the fact into
+  // the opposite category. Many immunities are conditions or effects
+  // ("unconscious", "death effects") that can never be a weakness, so only
+  // types pf2e itself lists as weakness (or resistance) types qualify.
+  const { weaknessTypes = {}, resistanceTypes = {} } = globalThis.CONFIG?.PF2E ?? {};
   return {
     name: actor.name,
     traits: [...(actor.system?.traits?.value ?? [])],
@@ -21,17 +27,20 @@ export function getActorFacts(actor) {
       value: w.value,
       label: w.typeLabel ?? w.type,
       fullLabel: w.label,
+      invertible: w.type in resistanceTypes,
     })),
     resistances: (attributes.resistances ?? []).map((r) => ({
       type: r.type,
       value: r.value,
       label: r.typeLabel ?? r.type,
       fullLabel: r.label,
+      invertible: r.type in weaknessTypes,
     })),
     immunities: (attributes.immunities ?? []).map((i) => ({
       type: i.type,
       label: i.typeLabel ?? i.type,
       fullLabel: i.label,
+      invertible: i.type in weaknessTypes,
     })),
   };
 }
@@ -49,6 +58,7 @@ export function listCategoryEntries(facts, category) {
       key: w.type,
       label: w.label,
       value: w.value,
+      invertible: w.invertible,
       text: `Weak to ${w.fullLabel ?? `${w.label} ${w.value}`}`,
     }));
   }
@@ -58,12 +68,14 @@ export function listCategoryEntries(facts, category) {
         key: r.type,
         label: r.label,
         value: r.value,
+        invertible: r.invertible,
         text: `Resistant to ${r.fullLabel ?? `${r.label} ${r.value}`}`,
       })),
       ...facts.immunities.map((i) => ({
         key: i.type,
         label: i.label,
         value: undefined,
+        invertible: i.invertible,
         text: `Immune to ${i.fullLabel ?? i.label}`,
       })),
     ];

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   getActorFacts,
   listCategoryEntries,
@@ -99,6 +99,39 @@ describe("getActorFacts", () => {
     expect(listCategoryEntries(getActorFacts(golem), CATEGORIES.RESISTANCES)[0].text).toBe("Resistant to physical 15 (except adamantine)");
   });
 
+  describe("invertible (whether a lie may flip this fact into the opposite category)", () => {
+    afterEach(() => {
+      vi.unstubAllGlobals();
+    });
+
+    const actorWith = (attributes) => ({ name: "X", system: { attributes } });
+
+    it("marks an immunity or resistance invertible only if pf2e recognizes its type as a weakness type", () => {
+      vi.stubGlobal("CONFIG", { PF2E: { weaknessTypes: { fire: "", poison: "" }, resistanceTypes: {} } });
+      const facts = getActorFacts(
+        actorWith({
+          immunities: [{ type: "fire" }, { type: "unconscious" }],
+          resistances: [{ type: "poison", value: 5 }, { type: "death-effects", value: 5 }],
+        })
+      );
+      expect(facts.immunities.map((i) => i.invertible)).toEqual([true, false]);
+      expect(facts.resistances.map((r) => r.invertible)).toEqual([true, false]);
+    });
+
+    it("marks a weakness invertible only if pf2e recognizes its type as a resistance type", () => {
+      vi.stubGlobal("CONFIG", { PF2E: { weaknessTypes: {}, resistanceTypes: { fire: "" } } });
+      const facts = getActorFacts(actorWith({ weaknesses: [{ type: "fire", value: 5 }, { type: "vampire-weaknesses", value: 5 }] }));
+      expect(facts.weaknesses.map((w) => w.invertible)).toEqual([true, false]);
+    });
+
+    it("treats nothing as invertible when pf2e's type lists aren't available", () => {
+      vi.stubGlobal("CONFIG", {});
+      const facts = getActorFacts(actorWith({ immunities: [{ type: "fire" }], weaknesses: [{ type: "fire", value: 5 }] }));
+      expect(facts.immunities[0].invertible).toBe(false);
+      expect(facts.weaknesses[0].invertible).toBe(false);
+    });
+  });
+
   it("builds 'type value' text when pf2e supplies no full label", () => {
     const bare = { name: "X", system: { attributes: { weaknesses: [{ type: "silver", value: 5, typeLabel: "silver" }] } } };
     expect(listCategoryEntries(getActorFacts(bare), CATEGORIES.WEAKNESSES)[0].text).toBe("Weak to silver 5");
@@ -106,7 +139,7 @@ describe("getActorFacts", () => {
 
   it("falls back to the raw type slug when pf2e supplies no typeLabel", () => {
     const bare = { name: "X", system: { attributes: { weaknesses: [{ type: "fire", value: 10 }] } } };
-    expect(getActorFacts(bare).weaknesses).toEqual([{ type: "fire", value: 10, label: "fire" }]);
+    expect(getActorFacts(bare).weaknesses).toMatchObject([{ type: "fire", value: 10, label: "fire" }]);
   });
 });
 

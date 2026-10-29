@@ -11,9 +11,9 @@ import { CREATURE_TRAIT_SKILLS } from "../scripts/data/trait-skill-map.js";
 const richFacts = {
   name: "Test Ghoul",
   traits: ["undead"],
-  weaknesses: [{ type: "fire", value: 5, label: "fire" }],
-  resistances: [{ type: "cold", value: 8, label: "cold" }],
-  immunities: [{ type: "poison", label: "poison" }],
+  weaknesses: [{ type: "fire", value: 5, label: "fire", invertible: true }],
+  resistances: [{ type: "cold", value: 8, label: "cold", invertible: true }],
+  immunities: [{ type: "poison", label: "poison", invertible: true }],
 };
 
 const emptyFacts = { name: "Blank Slate", traits: [], weaknesses: [], resistances: [], immunities: [] };
@@ -56,6 +56,24 @@ describe("invertToFalseWeakness", () => {
     expect(result.text).toBe("Weak to cold 8");
   });
 
+  it("never turns an immunity pf2e can't have as a weakness (a condition or effect) into a false weakness", () => {
+    const zombieLike = {
+      ...emptyFacts,
+      immunities: [
+        { type: "unconscious", label: "unconscious", invertible: false },
+        { type: "poison", label: "poison", invertible: true },
+      ],
+    };
+    for (let i = 0; i < 25; i++) {
+      expect(invertToFalseWeakness(zombieLike, new Set(), () => i / 25).text).toBe("Weak to poison 5");
+    }
+  });
+
+  it("returns null when every candidate is a type pf2e can't have as a weakness", () => {
+    const onlyConditions = { ...emptyFacts, immunities: [{ type: "doomed", label: "doomed", invertible: false }] };
+    expect(invertToFalseWeakness(onlyConditions, new Set())).toBeNull();
+  });
+
   it("falls back to a fixed representative value when inverting an immunity (which carries no real magnitude)", () => {
     // Exclude the "cold" resistance so only the "poison" immunity remains.
     const revealedKeys = new Set([makeFactKey(CATEGORIES.RESISTANCES, "cold")]);
@@ -78,6 +96,11 @@ describe("invertToFalseResistance", () => {
   it("excludes a candidate whose true fact has already been revealed to this character", () => {
     const revealedKeys = new Set([makeFactKey(CATEGORIES.WEAKNESSES, "fire")]);
     expect(invertToFalseResistance(richFacts, revealedKeys)).toBeNull();
+  });
+
+  it("never turns a weakness pf2e can't have as a resistance into a false resistance", () => {
+    const vampireLike = { ...emptyFacts, weaknesses: [{ type: "vampire-weaknesses", label: "vampire weaknesses", value: 5, invertible: false }] };
+    expect(invertToFalseResistance(vampireLike, new Set())).toBeNull();
   });
 
   it("presents a false resistance with the same value/label formatting as a real one, reusing the inverted fact's real magnitude", () => {

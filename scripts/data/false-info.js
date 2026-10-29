@@ -24,11 +24,13 @@ function pickRandom(list, rng = Math.random) {
  * (immunities). Excludes any candidate whose true fact has already been
  * revealed to this character this encounter — a false weakness claim must
  * never contradict a resistance/immunity the character already truthfully
- * knows about. Falls back to nothing if no safe candidate remains.
+ * knows about. Only types pf2e allows as weaknesses are candidates
+ * (`invertible`, see actor-data.js) — "Weak to unconscious" would be an
+ * obvious tell. Falls back to nothing if no safe candidate remains.
  */
 export function invertToFalseWeakness(facts, revealedKeys = new Set(), rng = Math.random) {
   const candidates = listCategoryEntries(facts, CATEGORIES.RESISTANCES).filter(
-    (entry) => !revealedKeys.has(makeFactKey(CATEGORIES.RESISTANCES, entry.key))
+    (entry) => entry.invertible && !revealedKeys.has(makeFactKey(CATEGORIES.RESISTANCES, entry.key))
   );
   const entry = pickRandom(candidates, rng);
   if (!entry) return null;
@@ -40,11 +42,12 @@ export function invertToFalseWeakness(facts, revealedKeys = new Set(), rng = Mat
  * Falsely claims a resistance to a type the target is actually weak to (the
  * inversion), reusing the real magnitude of the inverted weakness. Excludes
  * any candidate whose true fact has already been revealed to this character
- * this encounter. Falls back to nothing if no safe candidate remains.
+ * this encounter, and any type pf2e doesn't allow as a resistance. Falls
+ * back to nothing if no safe candidate remains.
  */
 export function invertToFalseResistance(facts, revealedKeys = new Set(), rng = Math.random) {
   const candidates = listCategoryEntries(facts, CATEGORIES.WEAKNESSES).filter(
-    (entry) => !revealedKeys.has(makeFactKey(CATEGORIES.WEAKNESSES, entry.key))
+    (entry) => entry.invertible && !revealedKeys.has(makeFactKey(CATEGORIES.WEAKNESSES, entry.key))
   );
   const entry = pickRandom(candidates, rng);
   if (!entry) return null;

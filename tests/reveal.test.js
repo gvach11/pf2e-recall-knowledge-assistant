@@ -5,9 +5,9 @@ import { CATEGORIES, DEGREES, makeFactKey } from "../scripts/constants.js";
 const facts = {
   name: "Test Ghoul",
   traits: ["undead"],
-  weaknesses: [{ type: "fire", value: 5, label: "fire" }],
-  resistances: [{ type: "cold", value: 5, label: "cold" }],
-  immunities: [{ type: "poison", label: "poison" }],
+  weaknesses: [{ type: "fire", value: 5, label: "fire", invertible: true }],
+  resistances: [{ type: "cold", value: 5, label: "cold", invertible: true }],
+  immunities: [{ type: "poison", label: "poison", invertible: true }],
 };
 
 describe("resolveReveal", () => {
