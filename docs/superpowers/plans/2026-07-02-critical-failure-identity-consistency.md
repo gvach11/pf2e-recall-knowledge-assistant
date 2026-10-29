@@ -1,6 +1,8 @@
 # Critical Failure / Identity Consistency Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+>
+> **Status:** All steps completed and verified against the current codebase (2026-10-29) — see architecture report F8.
 
 **Goal:** On Critical Failure, if the acting character hasn't already identified the target this encounter, treat the outcome exactly like a plain Failure (no baseline, no fact — true or false) instead of generating false info, closing the "unknown identity + confidently-stated specific fact" tell.
 
@@ -27,7 +29,7 @@
 - Consumes: `DEGREES.CRITICAL_FAILURE`, `DEGREES.FAILURE` from `scripts/constants.js` (already imported in `reveal.js`); `isIdentified(combat, actorUuid, targetUuid)` from `scripts/repeat-attempts.js`, already imported and called in `recall-knowledge-dialog.js` as `alreadyIdentified` (currently only passed to `renderResultChatMessage`, not to `resolveReveal`).
 - Produces: new signature `resolveReveal(facts, category, degree, revealedKeys = new Set(), alreadyIdentified = false, rng = Math.random)` — note `alreadyIdentified` is inserted **before** `rng`, shifting `rng` from the 5th to the 6th positional argument. Every existing caller that passes `rng` positionally must be updated.
 
-- [ ] **Step 1: Update existing tests in `tests/reveal.test.js` for the new positional argument**
+- [x] **Step 1: Update existing tests in `tests/reveal.test.js` for the new positional argument**
 
 Open `tests/reveal.test.js`. Replace the entire file with:
 
@@ -96,13 +98,13 @@ describe("resolveReveal", () => {
 });
 ```
 
-- [ ] **Step 2: Run the tests and verify they fail for the right reason**
+- [x] **Step 2: Run the tests and verify they fail for the right reason**
 
 Run: `npm test -- tests/reveal.test.js`
 
 Expected: the new test `"critical failure on a target NOT YET identified is treated exactly like a Failure..."` **FAILS**, because `resolveReveal` doesn't accept/use an `alreadyIdentified` parameter yet — it still always generates false info on Critical Failure. The failure message should show `reveal.facts` containing one false fact instead of the expected empty array. The other tests (updated with the new positional `false`/`true` argument) should still **PASS** — their behavior hasn't changed, only the call signature has. If any of those fail, the positional argument was inserted incorrectly — fix the test file, don't touch `scripts/reveal.js` yet.
 
-- [ ] **Step 3: Implement the minimal change in `scripts/reveal.js`**
+- [x] **Step 3: Implement the minimal change in `scripts/reveal.js`**
 
 Open `scripts/reveal.js`. Replace the function signature and its first branch:
 
@@ -153,13 +155,13 @@ Leave everything below the `if (degree === DEGREES.FAILURE) { ... }` block exact
  */
 ```
 
-- [ ] **Step 4: Run the tests and verify they pass**
+- [x] **Step 4: Run the tests and verify they pass**
 
 Run: `npm test -- tests/reveal.test.js`
 
 Expected: all 7 tests in `tests/reveal.test.js` **PASS**.
 
-- [ ] **Step 5: Wire `alreadyIdentified` into the dialog's call to `resolveReveal`**
+- [x] **Step 5: Wire `alreadyIdentified` into the dialog's call to `resolveReveal`**
 
 Open `scripts/applications/recall-knowledge-dialog.js`. Find this block inside `#onRollSkill` (currently around lines 118-124):
 
@@ -175,13 +177,13 @@ Replace it with:
 
 (`alreadyIdentified` is already computed a few lines above this call via `isIdentified(combat, actorUuid, targetUuid)` and already passed to `renderResultChatMessage` — this just also threads it into `resolveReveal`. No other changes needed in this file.)
 
-- [ ] **Step 6: Run the full test suite**
+- [x] **Step 6: Run the full test suite**
 
 Run: `npm test`
 
 Expected: all test files pass (60+ tests, no failures, no unhandled errors).
 
-- [ ] **Step 7: Checkpoint — no commit (no git repository in this project)**
+- [x] **Step 7: Checkpoint — no commit (no git repository in this project)**
 
 Confirm both files are saved: `scripts/reveal.js` and `scripts/applications/recall-knowledge-dialog.js`. This task is complete once Step 6 passes.
 
