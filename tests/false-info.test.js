@@ -128,6 +128,13 @@ describe("pickFalseTrait", () => {
     }
   });
 
+  it("never lies that a hazard is a different kind of hazard than its baseline already said (trap vs haunt)", () => {
+    const pit = { ...emptyFacts, kind: "hazard", traits: ["trap", "mechanical"] };
+    for (let i = 0; i < 25; i++) {
+      expect(["haunt", "trap"]).not.toContain(pickFalseTrait(pit, () => i / 25).text);
+    }
+  });
+
   it("returns null only if the target somehow has every known trait", () => {
     const allTraitsFacts = { ...emptyFacts, traits: Object.keys(CREATURE_TRAIT_SKILLS) };
     expect(pickFalseTrait(allTraitsFacts)).toBeNull();

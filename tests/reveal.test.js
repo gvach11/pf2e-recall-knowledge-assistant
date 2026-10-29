@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { resolveReveal } from "../scripts/reveal.js";
-import { CATEGORIES, DEGREES, makeFactKey } from "../scripts/constants.js";
+import { CATEGORIES, DEGREES, NOTHING_NOTABLE_KEY, makeFactKey } from "../scripts/constants.js";
 
 const facts = {
   name: "Test Ghoul",
@@ -55,12 +55,34 @@ describe("resolveReveal", () => {
     }
   });
 
+  it("a lie never claims 'nothing notable' about a category where the character already knows a true fact", () => {
+    // Werewolf: one weakness, nothing to invert into a false weakness. The
+    // player already learned "Weak to silver 5"; "nothing notable" now would
+    // contradict it, so the lie repeats the known (true) fact instead.
+    const werewolf = { name: "Werewolf", traits: ["beast"], weaknesses: [{ type: "silver", value: 5, label: "silver", invertible: true }], resistances: [], immunities: [] };
+    const known = new Set([makeFactKey(CATEGORIES.WEAKNESSES, "silver")]);
+    const lie = resolveReveal(werewolf, CATEGORIES.WEAKNESSES, DEGREES.CRITICAL_FAILURE, known, true, () => 0);
+    expect(lie.facts).toEqual(["Weak to silver 5"]);
+  });
+
+  it("a lie stays 'nothing notable' in a category a Success already reported as nothing notable", () => {
+    const unicorn = { name: "Unicorn", traits: ["beast"], weaknesses: [], resistances: [], immunities: [] };
+    const success = resolveReveal(unicorn, CATEGORIES.TRAITS, DEGREES.SUCCESS, new Set(), false, () => 0);
+    expect(success.facts).toEqual([]);
+
+    const known = new Set(success.revealedKeys);
+    for (let i = 0; i < 25; i++) {
+      const lie = resolveReveal(unicorn, CATEGORIES.TRAITS, DEGREES.CRITICAL_FAILURE, known, true, () => i / 25);
+      expect(lie.facts).toEqual([]);
+    }
+  });
+
   it("a plain Success on an empty category says nothing notable instead of answering a different category", () => {
     const onlyTraits = { name: "Werewolf", traits: ["beast", "werecreature"], weaknesses: [], resistances: [], immunities: [] };
     for (let i = 0; i < 25; i++) {
       const reveal = resolveReveal(onlyTraits, CATEGORIES.RESISTANCES, DEGREES.SUCCESS, new Set(), false, () => i / 25);
       expect(reveal.facts).toEqual([]);
-      expect(reveal.revealedKeys).toEqual([]);
+      expect(reveal.revealedKeys).toEqual([makeFactKey(CATEGORIES.RESISTANCES, NOTHING_NOTABLE_KEY)]);
     }
   });
 

@@ -1,5 +1,5 @@
 import { CATEGORIES, makeFactKey } from "./constants.js";
-import { CREATURE_TRAIT_SKILLS, HAZARD_TRAIT_SKILLS, TRADITION_TRAITS } from "./data/trait-skill-map.js";
+import { CREATURE_TRAIT_SKILLS, HAZARD_IDENTITY_TRAITS, HAZARD_TRAIT_SKILLS, TRADITION_TRAITS } from "./data/trait-skill-map.js";
 
 /**
  * Normalizes a live pf2e NPC/Hazard actor document into a plain data shape
@@ -126,9 +126,6 @@ export function pickFactFromOtherCategory(facts, excludedCategories, rng = Math.
   }
   return null;
 }
-
-// Not creature types, but what a hazard "is" for the baseline sentence.
-const HAZARD_IDENTITY_TRAITS = ["haunt", "trap"];
 
 /**
  * The trait the baseline sentence names ("X is a Y."). pf2e stores traits

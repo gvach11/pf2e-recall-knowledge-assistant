@@ -1,5 +1,5 @@
-import { CATEGORIES, DEGREES, makeFactKey } from "./constants.js";
-import { pickCategoryEntry, pickFactFromOtherCategory, pickIdentityTrait } from "./actor-data.js";
+import { CATEGORIES, DEGREES, NOTHING_NOTABLE_KEY, makeFactKey } from "./constants.js";
+import { listCategoryEntries, pickCategoryEntry, pickFactFromOtherCategory, pickIdentityTrait } from "./actor-data.js";
 import { generateFalseInfo } from "./data/false-info.js";
 
 /**
@@ -48,9 +48,9 @@ export function resolveReveal(facts, category, degree, revealedKeys = new Set(),
   const baseline = { name: facts.name, trait: identityTrait };
 
   if (degree === DEGREES.CRITICAL_FAILURE) {
-    const falseFact = generateFalseInfo(facts, category, revealedKeys, rng);
-    return { baseline, facts: falseFact ? [falseFact.text] : [], revealedKeys: [] };
+    return { baseline, facts: resolveLie(facts, category, revealedKeys, rng), revealedKeys: [] };
   }
+
   // The baseline already states this trait; offering it again as the
   // Traits fact would spend the reveal on something the player just read.
   const statedKeys = new Set([makeFactKey(CATEGORIES.TRAITS, identityTrait)]);
@@ -69,6 +69,9 @@ export function resolveReveal(facts, category, degree, revealedKeys = new Set(),
   if (primaryEntry) {
     revealed.push(primaryEntry.text);
     newKeys.push(makeFactKey(primaryEntry.category, primaryEntry.key));
+  } else if (degree === DEGREES.SUCCESS) {
+    // "Nothing notable" is itself something the character now knows.
+    newKeys.push(makeFactKey(category, NOTHING_NOTABLE_KEY));
   }
 
   if (degree === DEGREES.CRITICAL_SUCCESS) {
@@ -80,4 +83,22 @@ export function resolveReveal(facts, category, degree, revealedKeys = new Set(),
   }
 
   return { baseline, facts: revealed, revealedKeys: newKeys };
+}
+
+/**
+ * The fact line(s) of a critical-failure lie, never contradicting what this
+ * character already learned in the chosen category (SPEC.md §6.4):
+ * - a Success already said "nothing notable" here → stay nothing notable;
+ * - otherwise one false fact, if a safe one exists;
+ * - otherwise repeat a true fact already learned here ("nothing notable"
+ *   would contradict it), or nothing if none was learned.
+ */
+function resolveLie(facts, category, revealedKeys, rng) {
+  if (revealedKeys.has(makeFactKey(category, NOTHING_NOTABLE_KEY))) return [];
+
+  const falseFact = generateFalseInfo(facts, category, revealedKeys, rng);
+  if (falseFact) return [falseFact.text];
+
+  const known = listCategoryEntries(facts, category).filter((entry) => revealedKeys.has(makeFactKey(category, entry.key)));
+  return known.length ? [known[Math.floor(rng() * known.length)].text] : [];
 }

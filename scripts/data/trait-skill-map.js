@@ -48,3 +48,8 @@ export const HAZARD_TRAIT_SKILLS = Object.freeze({
 // A tradition trait pins a magical hazard to one skill, so the generic
 // "any tradition" `magical` entry no longer applies.
 export const TRADITION_TRAITS = Object.freeze(["arcane", "divine", "occult", "primal"]);
+
+// Not creature types, but what a hazard "is" for the baseline sentence
+// ("Hidden Pit is a trap."). Never offered as a false hazard trait, since
+// that would contradict the baseline printed right above it.
+export const HAZARD_IDENTITY_TRAITS = Object.freeze(["haunt", "trap"]);

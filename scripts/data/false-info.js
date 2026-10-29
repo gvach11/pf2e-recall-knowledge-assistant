@@ -1,5 +1,5 @@
 import { CATEGORIES, makeFactKey } from "../constants.js";
-import { CREATURE_TRAIT_SKILLS, HAZARD_TRAIT_SKILLS } from "./trait-skill-map.js";
+import { CREATURE_TRAIT_SKILLS, HAZARD_IDENTITY_TRAITS, HAZARD_TRAIT_SKILLS } from "./trait-skill-map.js";
 import { listCategoryEntries } from "../actor-data.js";
 
 // pf2e immunities carry no numeric magnitude, so a false weakness inverted
@@ -66,7 +66,7 @@ export function invertToFalseResistance(facts, revealedKeys = new Set(), rng = M
 export function pickFalseTrait(facts, rng = Math.random) {
   const actualTraits = new Set(facts.traits);
   const pool = facts.kind === "hazard" ? HAZARD_TRAIT_SKILLS : CREATURE_TRAIT_SKILLS;
-  const candidates = Object.keys(pool).filter((trait) => !actualTraits.has(trait));
+  const candidates = Object.keys(pool).filter((trait) => !actualTraits.has(trait) && !HAZARD_IDENTITY_TRAITS.includes(trait));
   const trait = pickRandom(candidates, rng);
   if (!trait) return null;
   return { category: CATEGORIES.TRAITS, text: trait };

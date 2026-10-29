@@ -253,7 +253,11 @@ info-dump.
     a lie built from one would be an obvious tell.
   - **Must never contradict a fact already truthfully revealed** to this
     character about this target earlier in the same encounter (tracked
-    alongside the repeat-attempt state, §6.6).
+    alongside the repeat-attempt state, §6.6). That includes a Success's
+    "nothing notable in that regard": once a category was reported empty,
+    a later lie there stays "nothing notable". Conversely, if no safe lie
+    exists but the character already knows a true fact in that category,
+    the lie repeats that true fact rather than claim "nothing notable".
   - Traits: pick a false trait from the same fixed creature-type trait list
     used for skill relevance (§2), excluding traits the target actually
     has, rather than an arbitrary/nonsense trait.

@@ -28,3 +28,8 @@ export const IDENTIFYING_DEGREES = new Set([DEGREES.SUCCESS, DEGREES.CRITICAL_SU
 export function makeFactKey(category, key) {
   return `${category}:${key}`;
 }
+
+// Recorded (as `makeFactKey(category, NOTHING_NOTABLE_KEY)`) when a Success
+// told a character a category holds nothing notable, so a later lie can't
+// contradict that by claiming something there. Not a pf2e type slug.
+export const NOTHING_NOTABLE_KEY = "~nothing-notable";
