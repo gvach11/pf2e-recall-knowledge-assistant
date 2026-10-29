@@ -177,6 +177,10 @@
 - **Explanation:** The PF2e ±10 critical-step rule is hardcoded as a literal `10` twice, while a separately-named `AVERAGE_D20_ROLL = 10` constant (used for a different purpose, expected-roll estimation) coincidentally shares the value.
 - **Evidence:** `scripts/data/dc-table.js:73,75` (`rollTotal >= dc + 10` / `<= dc - 10`) vs. `dc-table.js:98` (`const AVERAGE_D20_ROLL = 10;`).
 - **Found by:** Error Handling & Observability specialist; verified.
+- **Status:** Fixed
+- **Status reason:** Introduced `CRITICAL_STEP_MARGIN = 10` next to `computeDegreeOfSuccess`, distinct from the unrelated `AVERAGE_D20_ROLL` constant used by `computeLikelihood`. The two literal `10`s no longer look like the same magic number.
+- **Status date:** 2026-10-29
+- **Status commit:** 1675095
 
 ### [F12] `false-info.js` bypasses `actor-data.js`'s own category accessor
 - **Category:** Flaw 6 (Leaky abstractions)
