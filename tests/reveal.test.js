@@ -13,7 +13,7 @@ const facts = {
 describe("resolveReveal", () => {
   it("failure reveals nothing and records no new keys", () => {
     const reveal = resolveReveal(facts, CATEGORIES.WEAKNESSES, DEGREES.FAILURE, new Set(), false);
-    expect(reveal).toEqual({ baseline: null, facts: [], isFalse: false, revealedKeys: [] });
+    expect(reveal).toEqual({ baseline: null, facts: [], revealedKeys: [] });
   });
 
   it("success includes a baseline and one fact, and records that fact's key", () => {
@@ -21,7 +21,6 @@ describe("resolveReveal", () => {
     expect(reveal.baseline).toEqual({ name: "Test Ghoul", trait: "undead" });
     expect(reveal.facts).toEqual(["Weak to fire 5"]);
     expect(reveal.revealedKeys).toEqual([makeFactKey(CATEGORIES.WEAKNESSES, "fire")]);
-    expect(reveal.isFalse).toBe(false);
   });
 
   it("critical success includes a baseline plus two distinct facts from different categories, with both keys recorded", () => {
@@ -36,13 +35,12 @@ describe("resolveReveal", () => {
     const reveal = resolveReveal(facts, CATEGORIES.WEAKNESSES, DEGREES.CRITICAL_FAILURE, new Set(), true, () => 0);
     expect(reveal.baseline).toBeNull();
     expect(reveal.facts).toHaveLength(1);
-    expect(reveal.isFalse).toBe(true);
     expect(reveal.revealedKeys).toEqual([]);
   });
 
   it("critical failure on a target NOT YET identified is treated exactly like a Failure — no baseline, no fact, real or false", () => {
     const reveal = resolveReveal(facts, CATEGORIES.WEAKNESSES, DEGREES.CRITICAL_FAILURE, new Set(), false, () => 0);
-    expect(reveal).toEqual({ baseline: null, facts: [], isFalse: false, revealedKeys: [] });
+    expect(reveal).toEqual({ baseline: null, facts: [], revealedKeys: [] });
   });
 
   it("regression: critical failure never contradicts a fact already revealed true this encounter", () => {

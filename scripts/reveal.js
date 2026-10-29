@@ -22,7 +22,7 @@ import { generateFalseInfo } from "./data/false-info.js";
  * disguised. Once identified, Critical Failure resumes giving one false,
  * non-contradictory fact as before.
  *
- * Returns `{ baseline, facts, isFalse, revealedKeys }`, where the returned
+ * Returns `{ baseline, facts, revealedKeys }`, where the returned
  * `revealedKeys` are the *new* true-fact keys earned by this attempt only
  * (empty for Failure/Critical Failure), for the caller to persist.
  *
@@ -34,16 +34,16 @@ import { generateFalseInfo } from "./data/false-info.js";
  */
 export function resolveReveal(facts, category, degree, revealedKeys = new Set(), alreadyIdentified = false, rng = Math.random) {
   if (degree === DEGREES.CRITICAL_FAILURE && !alreadyIdentified) {
-    return { baseline: null, facts: [], isFalse: false, revealedKeys: [] };
+    return { baseline: null, facts: [], revealedKeys: [] };
   }
 
   if (degree === DEGREES.CRITICAL_FAILURE) {
     const falseFact = generateFalseInfo(facts, category, revealedKeys, rng);
-    return { baseline: null, facts: falseFact ? [falseFact.text] : [], isFalse: true, revealedKeys: [] };
+    return { baseline: null, facts: falseFact ? [falseFact.text] : [], revealedKeys: [] };
   }
 
   if (degree === DEGREES.FAILURE) {
-    return { baseline: null, facts: [], isFalse: false, revealedKeys: [] };
+    return { baseline: null, facts: [], revealedKeys: [] };
   }
 
   const primaryTrait = facts.traits[0] ?? "creature";
@@ -71,5 +71,5 @@ export function resolveReveal(facts, category, degree, revealedKeys = new Set(),
     }
   }
 
-  return { baseline, facts: revealed, isFalse: false, revealedKeys: newKeys };
+  return { baseline, facts: revealed, revealedKeys: newKeys };
 }

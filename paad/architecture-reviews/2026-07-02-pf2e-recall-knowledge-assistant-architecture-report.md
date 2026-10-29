@@ -182,6 +182,10 @@
 - **Explanation:** `isFalse` only appears in `reveal.js`'s own return statements; neither `render-result.js` nor the dialog reads it. Not a functional bug (SPEC.md intentionally renders false facts identically to true ones), but an unused field in an otherwise well-documented contract.
 - **Evidence:** `grep -rn "isFalse" scripts/` → all matches confined to `scripts/reveal.js`.
 - **Found by:** Integration & Data specialist; verified.
+- **Status:** Fixed
+- **Status reason:** Removed `isFalse` from `resolveReveal`'s return shape and all four of its return statements; the field was never read by any downstream caller (`render-result.js`, `roll-sequence.js`) in production. Updated the `reveal.test.js`/`render-result.test.js` assertions that referenced it (pre-existing structural tests, expected to change — no behavior change for any caller since nothing consumed the field).
+- **Status date:** 2026-10-29
+- **Status commit:** pending (see fix-architecture session commit)
 
 ### [F11] Two semantically distinct "10"s in `dc-table.js`, only one named
 - **Category:** Flaw 28 (Magic numbers/strings)

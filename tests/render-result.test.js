@@ -13,7 +13,7 @@ function baseArgs(overrides = {}) {
     rollingActor: ROLLING_ACTOR,
     targetActor: TARGET_ACTOR,
     alreadyIdentified: false,
-    reveal: { baseline: { name: "Test Ghoul", trait: "undead" }, facts: ["Weak to fire 5"], isFalse: false, revealedKeys: ["weaknesses:fire"] },
+    reveal: { baseline: { name: "Test Ghoul", trait: "undead" }, facts: ["Weak to fire 5"], revealedKeys: ["weaknesses:fire"] },
     ...overrides,
   };
 }
