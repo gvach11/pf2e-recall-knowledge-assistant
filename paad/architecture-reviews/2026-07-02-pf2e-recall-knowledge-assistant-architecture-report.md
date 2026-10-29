@@ -145,6 +145,10 @@
 - **Explanation:** Referenced only by its own definition and its own test; production code (`reveal.js`) uses `pickCategoryEntry` instead, added later to also carry the `key` needed for revealed-fact tracking.
 - **Evidence:** `scripts/actor-data.js:71-75`; `grep -rn "pickCategoryFact\b"` matches only `actor-data.js` and `tests/actor-data.test.js`.
 - **Found by:** Security & Code Quality specialist; verified.
+- **Status:** Fixed
+- **Status reason:** Removed `pickCategoryFact` and its test. This left `listCategoryItems` (its only production caller) with no remaining callers either, so it was removed too rather than leaving newly-dead code of the same kind behind.
+- **Status date:** 2026-10-29
+- **Status commit:** c2adb4b
 
 ### [F8] Stale/orphaned planning doc with unchecked checkboxes despite the described change being implemented
 - **Category:** Flaw 31 (Dead code / unused dependencies)
