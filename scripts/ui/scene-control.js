@@ -27,11 +27,23 @@ export function openRecallKnowledgeDialog() {
   const targetToken = getValidatedSingleTarget();
   if (!targetToken) return;
 
-  const rollingActor = game.user.character ?? canvas.tokens.controlled[0]?.actor;
+  const rollingActor = resolveRollingActor();
   if (!rollingActor) {
     ui.notifications.warn(game.i18n.localize("RKA.Warning.NoRollingActor"));
     return;
   }
 
   new RecallKnowledgeDialog({ targetToken, rollingActor }).render(true);
+}
+
+/**
+ * Whose memory is being tested. A player who owns several characters picks
+ * one by selecting its token, so a controlled character token they own
+ * wins over their assigned character; otherwise the assigned character
+ * rolls. Controlled NPCs and other people's characters never roll —
+ * Recall Knowledge is the player's own character's knowledge (SPEC.md §4).
+ */
+export function resolveRollingActor() {
+  const controlled = canvas.tokens.controlled.find((token) => token.actor?.type === "character" && token.actor.isOwner);
+  return controlled?.actor ?? game.user.character ?? null;
 }

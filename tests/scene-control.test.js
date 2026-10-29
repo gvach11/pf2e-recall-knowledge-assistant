@@ -9,7 +9,7 @@ vi.mock("../scripts/applications/recall-knowledge-dialog.js", () => ({
 
 const { getValidatedSingleTarget } = await import("../scripts/targeting.js");
 const { RecallKnowledgeDialog } = await import("../scripts/applications/recall-knowledge-dialog.js");
-const { registerSceneControl, openRecallKnowledgeDialog } = await import("../scripts/ui/scene-control.js");
+const { registerSceneControl, openRecallKnowledgeDialog, resolveRollingActor } = await import("../scripts/ui/scene-control.js");
 
 describe("registerSceneControl", () => {
   let hooksOn;
@@ -102,7 +102,7 @@ describe("openRecallKnowledgeDialog", () => {
 
   it("falls back to the controlled token's actor when the user has no assigned character", () => {
     const targetToken = { actor: { type: "npc" } };
-    const controlledActor = { name: "Controlled PC" };
+    const controlledActor = { name: "Controlled PC", type: "character", isOwner: true };
     getValidatedSingleTarget.mockReturnValue(targetToken);
     game.user.character = null;
     canvas.tokens.controlled = [{ actor: controlledActor }];
@@ -112,5 +112,44 @@ describe("openRecallKnowledgeDialog", () => {
     openRecallKnowledgeDialog();
 
     expect(RecallKnowledgeDialog).toHaveBeenCalledWith({ targetToken, rollingActor: controlledActor });
+  });
+});
+
+describe("resolveRollingActor", () => {
+  const assigned = { name: "Assigned Wizard", type: "character", isOwner: true };
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  function stub({ controlled = [], character = assigned } = {}) {
+    vi.stubGlobal("game", { user: { character } });
+    vi.stubGlobal("canvas", { tokens: { controlled: controlled.map((actor) => ({ actor })) } });
+  }
+
+  it("rolls as a controlled character the player owns, even when another character is assigned", () => {
+    const bard = { name: "Bard", type: "character", isOwner: true };
+    stub({ controlled: [bard] });
+    expect(resolveRollingActor()).toBe(bard);
+  });
+
+  it("uses the assigned character when nothing is controlled", () => {
+    stub();
+    expect(resolveRollingActor()).toBe(assigned);
+  });
+
+  it("ignores a controlled NPC token and uses the assigned character", () => {
+    stub({ controlled: [{ name: "Goblin", type: "npc", isOwner: true }] });
+    expect(resolveRollingActor()).toBe(assigned);
+  });
+
+  it("ignores a controlled character the user doesn't own", () => {
+    stub({ controlled: [{ name: "Someone else's PC", type: "character", isOwner: false }] });
+    expect(resolveRollingActor()).toBe(assigned);
+  });
+
+  it("is null with nothing controlled and no assigned character", () => {
+    stub({ character: null });
+    expect(resolveRollingActor()).toBeNull();
   });
 });
