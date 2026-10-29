@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { createFakeCombat } from "./helpers/fake-combat.js";
 import {
   attemptKey,
@@ -7,6 +7,7 @@ import {
   recordAttempt,
   isIdentified,
   getRevealedFacts,
+  getActiveEncounter,
 } from "../scripts/repeat-attempts.js";
 import { DEGREES } from "../scripts/constants.js";
 
@@ -139,5 +140,27 @@ describe("getRevealedFacts / recordAttempt revealed-key tracking", () => {
     await recordAttempt(combat, PC_1, TARGET_1, DEGREES.SUCCESS, ["resistances:cold"]);
     expect(getRevealedFacts(combat, PC_2, TARGET_1)).toEqual([]);
     expect(getRevealedFacts(combat, PC_1, TARGET_2)).toEqual([]);
+  });
+});
+
+describe("getActiveEncounter", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("ignores a combat that exists but hasn't started", () => {
+    vi.stubGlobal("game", { combat: { started: false } });
+    expect(getActiveEncounter()).toBeNull();
+  });
+
+  it("returns the viewed combat once it has started", () => {
+    const combat = { started: true };
+    vi.stubGlobal("game", { combat });
+    expect(getActiveEncounter()).toBe(combat);
+  });
+
+  it("is null with no combat at all", () => {
+    vi.stubGlobal("game", { combat: undefined });
+    expect(getActiveEncounter()).toBeNull();
   });
 });

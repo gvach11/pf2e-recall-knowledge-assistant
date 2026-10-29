@@ -21,6 +21,17 @@ export function shouldBlockAfter(degree) {
   return !IDENTIFYING_DEGREES.has(degree);
 }
 
+/**
+ * The encounter attempts are tracked against, or null outside one.
+ * `game.combat` is whichever combat the tracker is showing, which may be
+ * one still being set up; only a started combat counts as an active
+ * encounter (SPEC.md §6.6), so preparing a fight never throttles anyone.
+ */
+export function getActiveEncounter() {
+  const combat = game.combat;
+  return combat?.started ? combat : null;
+}
+
 function getRecord(combat, actorUuid, targetUuid) {
   if (!combat) return null;
   const data = combat.getFlag(MODULE_ID, FLAG_KEY) ?? {};

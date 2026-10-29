@@ -1,7 +1,7 @@
 import { CATEGORIES, MODULE_ID } from "../constants.js";
 import { getActorFacts, getRelevantSkills } from "../actor-data.js";
 import { computeHiddenDC, computeLikelihood } from "../data/dc-table.js";
-import { isAttemptBlocked } from "../repeat-attempts.js";
+import { getActiveEncounter, isAttemptBlocked } from "../repeat-attempts.js";
 import { executeRollSequence } from "../roll-sequence.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
@@ -47,7 +47,7 @@ export class RecallKnowledgeDialog extends HandlebarsApplicationMixin(Applicatio
   };
 
   async _prepareContext() {
-    const combat = game.combat ?? null;
+    const combat = getActiveEncounter();
     const blocked = isAttemptBlocked(combat, this.#rollingActor.uuid, this.#targetActor.uuid);
 
     const dc = this.#dc;
@@ -98,7 +98,7 @@ export class RecallKnowledgeDialog extends HandlebarsApplicationMixin(Applicatio
     this.#isRolling = true;
     try {
       const result = await executeRollSequence({
-        combat: game.combat ?? null,
+        combat: getActiveEncounter(),
         rollingActor: this.#rollingActor,
         targetActor: this.#targetActor,
         facts: this.#facts,
