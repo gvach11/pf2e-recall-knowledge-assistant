@@ -66,15 +66,16 @@ describe("executeRollSequence", () => {
     expect(rollRecallKnowledge).not.toHaveBeenCalled();
   });
 
-  it("returns 'no-roll' and shows an error when the roll produces no result", async () => {
+  it("treats a roll with no result (pf2e's check dialog was closed) as a quiet cancel, not an error", async () => {
     rollRecallKnowledge.mockResolvedValue(null);
 
     const result = await executeRollSequence(baseArgs());
 
-    expect(result).toEqual({ outcome: "no-roll" });
-    expect(ui.notifications.error).toHaveBeenCalledWith("RKA.Error.RollFailed");
+    expect(result).toEqual({ outcome: "cancelled" });
+    expect(ui.notifications.error).not.toHaveBeenCalled();
     expect(renderResultChatMessage).not.toHaveBeenCalled();
-    expect(consoleErrorSpy).toHaveBeenCalled();
+    expect(persistAttempt).not.toHaveBeenCalled();
+    expect(consoleErrorSpy).not.toHaveBeenCalled();
   });
 
   it("completes the full sequence and persists the attempt after the chat message renders", async () => {

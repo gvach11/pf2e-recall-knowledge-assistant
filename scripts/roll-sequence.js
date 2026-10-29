@@ -41,10 +41,12 @@ export async function executeRollSequence({
       event,
     });
 
+    // pf2e resolves with no roll when the player closes its Check Modifiers
+    // dialog instead of rolling — a deliberate cancel, not a failure. Real
+    // failures throw and land in the catch below.
     if (!rollResult) {
-      console.error("executeRollSequence: rollRecallKnowledge resolved with no roll result", { actorUuid, targetUuid });
-      ui.notifications.error(game.i18n.localize("RKA.Error.RollFailed"));
-      return { outcome: "no-roll" };
+      console.debug("executeRollSequence: roll cancelled, nothing recorded", { actorUuid, targetUuid });
+      return { outcome: "cancelled" };
     }
 
     const degree = computeDegreeOfSuccess(rollResult.rollTotal, dc, rollResult.naturalD20);
