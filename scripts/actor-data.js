@@ -9,22 +9,25 @@ import { CREATURE_TRAIT_SKILLS } from "./data/trait-skill-map.js";
  */
 export function getActorFacts(actor) {
   const attributes = actor.system?.attributes ?? {};
+  // pf2e's `label`/`applicationLabel` already embed the value and/or
+  // exceptions ("axes 5 (except acid)"); our reveal text adds the value
+  // itself, so only the plain type name is safe to use here.
   return {
     name: actor.name,
     traits: [...(actor.system?.traits?.value ?? [])],
     weaknesses: (attributes.weaknesses ?? []).map((w) => ({
       type: w.type,
       value: w.value,
-      label: w.label ?? w.applicationLabel ?? w.type,
+      label: w.typeLabel ?? w.type,
     })),
     resistances: (attributes.resistances ?? []).map((r) => ({
       type: r.type,
       value: r.value,
-      label: r.label ?? r.applicationLabel ?? r.type,
+      label: r.typeLabel ?? r.type,
     })),
     immunities: (attributes.immunities ?? []).map((i) => ({
       type: i.type,
-      label: i.label ?? i.applicationLabel ?? i.type,
+      label: i.typeLabel ?? i.type,
     })),
   };
 }

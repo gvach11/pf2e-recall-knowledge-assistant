@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  getActorFacts,
   listCategoryEntries,
   pickCategoryEntry,
   pickFactFromOtherCategory,
@@ -39,6 +40,42 @@ describe("pickFactFromOtherCategory", () => {
     const onlyTraits = { name: "X", traits: ["undead"], weaknesses: [], resistances: [], immunities: [] };
     const result = pickFactFromOtherCategory(onlyTraits, CATEGORIES.WEAKNESSES);
     expect(result.key).toBe("undead");
+  });
+});
+
+describe("getActorFacts", () => {
+  // Shape of pf2e 8.5's IWR objects: `label` already embeds the value and
+  // exceptions, `typeLabel` is just the localized type name.
+  const pf2eActor = {
+    name: "Commoner",
+    system: {
+      traits: { value: ["human", "humanoid"] },
+      attributes: {
+        weaknesses: [
+          { type: "adamantine", value: 5, typeLabel: "adamantine", label: "adamantine 5 (except air)", applicationLabel: "adamantine (except air)" },
+        ],
+        resistances: [
+          { type: "axes", value: 5, typeLabel: "axes", label: "axes 5 (except acid)", applicationLabel: "axes (except acid)" },
+        ],
+        immunities: [
+          { type: "abysium", typeLabel: "abysium", label: "abysium (except aging)", applicationLabel: "abysium (except aging)" },
+        ],
+      },
+    },
+  };
+
+  it("uses pf2e's plain type label so the value is never printed twice", () => {
+    const actorFacts = getActorFacts(pf2eActor);
+    expect(listCategoryEntries(actorFacts, CATEGORIES.WEAKNESSES)[0].text).toBe("Weak to adamantine 5");
+    expect(listCategoryEntries(actorFacts, CATEGORIES.RESISTANCES).map((e) => e.text)).toEqual([
+      "Resistant to axes 5",
+      "Immune to abysium",
+    ]);
+  });
+
+  it("falls back to the raw type slug when pf2e supplies no typeLabel", () => {
+    const bare = { name: "X", system: { attributes: { weaknesses: [{ type: "fire", value: 10 }] } } };
+    expect(getActorFacts(bare).weaknesses).toEqual([{ type: "fire", value: 10, label: "fire" }]);
   });
 });
 
