@@ -82,13 +82,26 @@ describe("getActorFacts", () => {
     },
   };
 
-  it("uses pf2e's plain type label so the value is never printed twice", () => {
+  it("keeps pf2e's exceptions in the reveal text without printing the value twice", () => {
     const actorFacts = getActorFacts(pf2eActor);
-    expect(listCategoryEntries(actorFacts, CATEGORIES.WEAKNESSES)[0].text).toBe("Weak to adamantine 5");
+    expect(listCategoryEntries(actorFacts, CATEGORIES.WEAKNESSES)[0].text).toBe("Weak to adamantine 5 (except air)");
     expect(listCategoryEntries(actorFacts, CATEGORIES.RESISTANCES).map((e) => e.text)).toEqual([
-      "Resistant to axes 5",
-      "Immune to abysium",
+      "Resistant to axes 5 (except acid)",
+      "Immune to abysium (except aging)",
     ]);
+  });
+
+  it("keeps an Iron Golem's 'except adamantine' on its physical resistance", () => {
+    const golem = {
+      name: "Iron Golem",
+      system: { attributes: { resistances: [{ type: "physical", value: 15, typeLabel: "physical", label: "physical 15 (except adamantine)" }] } },
+    };
+    expect(listCategoryEntries(getActorFacts(golem), CATEGORIES.RESISTANCES)[0].text).toBe("Resistant to physical 15 (except adamantine)");
+  });
+
+  it("builds 'type value' text when pf2e supplies no full label", () => {
+    const bare = { name: "X", system: { attributes: { weaknesses: [{ type: "silver", value: 5, typeLabel: "silver" }] } } };
+    expect(listCategoryEntries(getActorFacts(bare), CATEGORIES.WEAKNESSES)[0].text).toBe("Weak to silver 5");
   });
 
   it("falls back to the raw type slug when pf2e supplies no typeLabel", () => {

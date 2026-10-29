@@ -9,9 +9,10 @@ import { CREATURE_TRAIT_SKILLS } from "./data/trait-skill-map.js";
  */
 export function getActorFacts(actor) {
   const attributes = actor.system?.attributes ?? {};
-  // pf2e's `label`/`applicationLabel` already embed the value and/or
-  // exceptions ("axes 5 (except acid)"); our reveal text adds the value
-  // itself, so only the plain type name is safe to use here.
+  // pf2e's `label` is the full display form, value and exceptions included
+  // ("physical 15 (except adamantine)"), so true reveals print it as-is
+  // (`fullLabel`). `label` here is the bare type name, which false info
+  // builds its own text from.
   return {
     name: actor.name,
     traits: [...(actor.system?.traits?.value ?? [])],
@@ -19,15 +20,18 @@ export function getActorFacts(actor) {
       type: w.type,
       value: w.value,
       label: w.typeLabel ?? w.type,
+      fullLabel: w.label,
     })),
     resistances: (attributes.resistances ?? []).map((r) => ({
       type: r.type,
       value: r.value,
       label: r.typeLabel ?? r.type,
+      fullLabel: r.label,
     })),
     immunities: (attributes.immunities ?? []).map((i) => ({
       type: i.type,
       label: i.typeLabel ?? i.type,
+      fullLabel: i.label,
     })),
   };
 }
@@ -45,7 +49,7 @@ export function listCategoryEntries(facts, category) {
       key: w.type,
       label: w.label,
       value: w.value,
-      text: `Weak to ${w.label} ${w.value}`,
+      text: `Weak to ${w.fullLabel ?? `${w.label} ${w.value}`}`,
     }));
   }
   if (category === CATEGORIES.RESISTANCES) {
@@ -54,13 +58,13 @@ export function listCategoryEntries(facts, category) {
         key: r.type,
         label: r.label,
         value: r.value,
-        text: `Resistant to ${r.label} ${r.value}`,
+        text: `Resistant to ${r.fullLabel ?? `${r.label} ${r.value}`}`,
       })),
       ...facts.immunities.map((i) => ({
         key: i.type,
         label: i.label,
         value: undefined,
-        text: `Immune to ${i.label}`,
+        text: `Immune to ${i.fullLabel ?? i.label}`,
       })),
     ];
   }
