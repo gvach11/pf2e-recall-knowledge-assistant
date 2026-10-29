@@ -1,8 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  listCategoryItems,
   listCategoryEntries,
-  pickCategoryFact,
   pickCategoryEntry,
   pickFactFromOtherCategory,
   getRelevantSkills,
@@ -18,29 +16,6 @@ const facts = {
 };
 
 const emptyFacts = { name: "Nothing Notable", traits: [], weaknesses: [], resistances: [], immunities: [] };
-
-describe("listCategoryItems", () => {
-  it("combines resistances and immunities into one category", () => {
-    const items = listCategoryItems(facts, CATEGORIES.RESISTANCES);
-    expect(items).toHaveLength(2);
-    expect(items.some((i) => i.includes("cold"))).toBe(true);
-    expect(items.some((i) => i.includes("poison"))).toBe(true);
-  });
-
-  it("returns an empty array for a category with no data", () => {
-    expect(listCategoryItems(emptyFacts, CATEGORIES.WEAKNESSES)).toEqual([]);
-  });
-});
-
-describe("pickCategoryFact", () => {
-  it("returns null for an empty category (the 'nothing notable' case)", () => {
-    expect(pickCategoryFact(emptyFacts, CATEGORIES.TRAITS)).toBeNull();
-  });
-
-  it("returns a real fact when present", () => {
-    expect(pickCategoryFact(facts, CATEGORIES.WEAKNESSES)).toContain("fire");
-  });
-});
 
 describe("pickFactFromOtherCategory", () => {
   it("skips the excluded category and any empty categories", () => {

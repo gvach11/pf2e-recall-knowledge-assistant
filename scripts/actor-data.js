@@ -67,32 +67,17 @@ export function listCategoryEntries(facts, category) {
   return [];
 }
 
-/**
- * Formats every real fact in a category as display text only.
- */
-export function listCategoryItems(facts, category) {
-  return listCategoryEntries(facts, category).map((entry) => entry.text);
-}
-
 function pickRandom(list, rng) {
   if (list.length === 0) return undefined;
   return list[Math.floor(rng() * list.length)];
 }
 
 /**
- * Picks one real fact from a category, or null if that category is empty
- * for this target (the "nothing notable" case, §6.3).
- */
-export function pickCategoryFact(facts, category, rng = Math.random) {
-  const items = listCategoryItems(facts, category);
-  const item = pickRandom(items, rng);
-  return item ?? null;
-}
-
-/**
- * Like pickCategoryFact, but returns the category, stable key, and text
- * together — needed wherever the caller must remember exactly which fact
- * was revealed (e.g. to persist it and never contradict it later).
+ * Picks one real fact from a category, returning its category, stable key,
+ * and text together — needed wherever the caller must remember exactly
+ * which fact was revealed (e.g. to persist it and never contradict it
+ * later). Returns null if that category is empty for this target (the
+ * "nothing notable" case, §6.3).
  */
 export function pickCategoryEntry(facts, category, rng = Math.random) {
   const entries = listCategoryEntries(facts, category);
