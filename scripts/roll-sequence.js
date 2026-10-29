@@ -1,4 +1,4 @@
-import { computeHiddenDC, computeDegreeOfSuccess } from "./data/dc-table.js";
+import { computeDegreeOfSuccess } from "./data/dc-table.js";
 import { isAttemptBlocked, isIdentified, getRevealedFacts, recordAttempt } from "./repeat-attempts.js";
 import { resolveReveal } from "./reveal.js";
 import { rollRecallKnowledge } from "./roll.js";
@@ -9,12 +9,17 @@ import { renderResultChatMessage } from "./chat/render-result.js";
  * Recall Knowledge attempt. Extracted out of the dialog so it can be unit
  * tested without the ApplicationV2/HandlebarsApplicationMixin machinery the
  * dialog itself requires (see architecture report F4).
+ *
+ * `dc` is computed once by the caller and passed in rather than recomputed
+ * here, so there's a single source of truth for "the current DC" within one
+ * roll cycle (see architecture report F13).
  */
 export async function executeRollSequence({
   combat,
   rollingActor,
   targetActor,
   facts,
+  dc,
   selectedSkill,
   selectedCategory,
   event,
@@ -40,7 +45,6 @@ export async function executeRollSequence({
       return { outcome: "no-roll" };
     }
 
-    const dc = computeHiddenDC(targetActor);
     const degree = computeDegreeOfSuccess(rollResult.rollTotal, dc, rollResult.naturalD20);
 
     const priorRevealedKeys = new Set(getRevealedFacts(combat, actorUuid, targetUuid));

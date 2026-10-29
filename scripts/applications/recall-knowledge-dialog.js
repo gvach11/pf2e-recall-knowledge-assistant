@@ -11,6 +11,7 @@ export class RecallKnowledgeDialog extends HandlebarsApplicationMixin(Applicatio
   #targetActor;
   #rollingActor;
   #facts;
+  #dc;
   #selectedCategory = CATEGORIES.WEAKNESSES;
   #selectedSkill = null;
   #isRolling = false;
@@ -21,6 +22,7 @@ export class RecallKnowledgeDialog extends HandlebarsApplicationMixin(Applicatio
     this.#targetActor = targetToken.actor;
     this.#rollingActor = rollingActor;
     this.#facts = getActorFacts(this.#targetActor);
+    this.#dc = computeHiddenDC(this.#targetActor);
   }
 
   static DEFAULT_OPTIONS = {
@@ -48,7 +50,7 @@ export class RecallKnowledgeDialog extends HandlebarsApplicationMixin(Applicatio
     const combat = game.combat ?? null;
     const blocked = isAttemptBlocked(combat, this.#rollingActor.uuid, this.#targetActor.uuid);
 
-    const dc = computeHiddenDC(this.#targetActor);
+    const dc = this.#dc;
     const relevantSlugs = getRelevantSkills(this.#targetActor, this.#facts);
     const skills = relevantSlugs.map((slug) => {
       const statistic = this.#rollingActor.skills?.[slug] ?? this.#rollingActor.getStatistic?.(slug);
@@ -56,7 +58,7 @@ export class RecallKnowledgeDialog extends HandlebarsApplicationMixin(Applicatio
       const isTrained = (statistic?.rank ?? 0) >= 1;
       return {
         slug,
-        label: statistic?.label ?? game.i18n.localize(`PF2E.Skill.${slug}`) ?? slug,
+        label: statistic?.label ?? game.i18n.localize(`PF2E.Skill.${slug}`),
         likelihood: computeLikelihood(modifier, dc, isTrained),
         selected: slug === this.#selectedSkill,
       };
@@ -100,6 +102,7 @@ export class RecallKnowledgeDialog extends HandlebarsApplicationMixin(Applicatio
         rollingActor: this.#rollingActor,
         targetActor: this.#targetActor,
         facts: this.#facts,
+        dc: this.#dc,
         selectedSkill: this.#selectedSkill,
         selectedCategory: this.#selectedCategory,
         event,
