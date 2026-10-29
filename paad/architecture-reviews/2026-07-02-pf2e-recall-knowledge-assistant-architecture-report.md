@@ -156,6 +156,10 @@
 - **Explanation:** All 7 step checkboxes are unchecked, yet the described critical-failure identification gating is already implemented (commit `796db6c`) — a confusing artifact for future readers.
 - **Evidence:** `docs/superpowers/plans/2026-07-02-critical-failure-identity-consistency.md` — 7× `- [ ]`, 0× `- [x]`.
 - **Found by:** Security & Code Quality specialist; verified.
+- **Status:** Fixed
+- **Status reason:** Checked all 7 step boxes and added a status note at the top of the plan confirming the described work was verified against the current codebase, since the gating behavior was already implemented and all 7 steps matched current code.
+- **Status date:** 2026-10-29
+- **Status commit:** ef77967
 
 ### [F9] Unreachable `?? slug` fallback after `game.i18n.localize()`
 - **Category:** Flaw 31 (Dead code / unused dependencies)
