@@ -188,4 +188,33 @@ describe("getRelevantSkills", () => {
     const hazardFacts = { ...facts, traits: ["undead"] };
     expect(getRelevantSkills(hazard, hazardFacts)).toEqual(["religion"]);
   });
+
+  describe("hazards (AoN: Crafting for mechanical, tradition skill for magic, Occultism/Religion for haunts)", () => {
+    const hazard = { type: "hazard" };
+    const skillsFor = (traits) => getRelevantSkills(hazard, { ...facts, traits }).sort();
+
+    it("identifies a mechanical trap with Crafting", () => {
+      expect(skillsFor(["mechanical", "trap"])).toEqual(["crafting"]);
+    });
+
+    it("identifies a magical trap with its tradition's skill when it has one", () => {
+      expect(skillsFor(["divine", "magical", "trap"])).toEqual(["religion"]);
+    });
+
+    it("identifies a magical trap with any tradition skill when it has no tradition trait", () => {
+      expect(skillsFor(["magical", "trap"])).toEqual(["arcana", "nature", "occultism", "religion"]);
+    });
+
+    it("identifies a haunt with Occultism or Religion", () => {
+      expect(skillsFor(["haunt"])).toEqual(["occultism", "religion"]);
+    });
+
+    it("identifies an environmental hazard with Nature", () => {
+      expect(skillsFor(["environmental"])).toEqual(["nature"]);
+    });
+
+    it("finds no skill for a bare 'trap' with nothing saying how it works", () => {
+      expect(skillsFor(["trap"])).toEqual([]);
+    });
+  });
 });

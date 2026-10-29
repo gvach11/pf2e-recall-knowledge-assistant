@@ -1,5 +1,5 @@
 import { CATEGORIES, makeFactKey } from "../constants.js";
-import { CREATURE_TRAIT_SKILLS } from "./trait-skill-map.js";
+import { CREATURE_TRAIT_SKILLS, HAZARD_TRAIT_SKILLS } from "./trait-skill-map.js";
 import { listCategoryEntries } from "../actor-data.js";
 
 // pf2e immunities carry no numeric magnitude, so a false weakness inverted
@@ -57,14 +57,16 @@ export function invertToFalseResistance(facts, revealedKeys = new Set(), rng = M
 /**
  * Picks a plausible false trait: one of the fixed creature-type traits
  * (the same pool used for skill relevance) that the target does NOT
- * actually have, never an arbitrary/nonsense trait. A false trait can
- * never contradict an already-revealed true fact (it's by definition not
- * one of the target's real traits), so no revealedKeys filtering is
- * needed here.
+ * actually have, never an arbitrary/nonsense trait. Hazards draw from the
+ * hazard-type pool instead — calling a pit trap "undead" would be a tell.
+ * A false trait can never contradict an already-revealed true fact (it's
+ * by definition not one of the target's real traits), so no revealedKeys
+ * filtering is needed here.
  */
 export function pickFalseTrait(facts, rng = Math.random) {
   const actualTraits = new Set(facts.traits);
-  const candidates = Object.keys(CREATURE_TRAIT_SKILLS).filter((trait) => !actualTraits.has(trait));
+  const pool = facts.kind === "hazard" ? HAZARD_TRAIT_SKILLS : CREATURE_TRAIT_SKILLS;
+  const candidates = Object.keys(pool).filter((trait) => !actualTraits.has(trait));
   const trait = pickRandom(candidates, rng);
   if (!trait) return null;
   return { category: CATEGORIES.TRAITS, text: trait };

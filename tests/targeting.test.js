@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { getValidatedSingleTarget } from "../scripts/targeting.js";
+import { getUnknownTargetLabelKey, getValidatedSingleTarget } from "../scripts/targeting.js";
 
 function fakeTargets(tokens) {
   return {
@@ -66,5 +66,15 @@ describe("getValidatedSingleTarget", () => {
 
     expect(result).toBe(token);
     expect(warnSpy).not.toHaveBeenCalled();
+  });
+});
+
+describe("getUnknownTargetLabelKey", () => {
+  it("calls an unidentified hazard an unknown hazard", () => {
+    expect(getUnknownTargetLabelKey({ type: "hazard" })).toBe("RKA.UnknownHazard");
+  });
+
+  it("calls an unidentified NPC an unknown creature", () => {
+    expect(getUnknownTargetLabelKey({ type: "npc" })).toBe("RKA.UnknownTarget");
   });
 });

@@ -3,6 +3,7 @@ import { getActorFacts, getRelevantSkills } from "../actor-data.js";
 import { computeHiddenDC, computeLikelihood } from "../data/dc-table.js";
 import { getActiveEncounter, isAttemptBlocked } from "../repeat-attempts.js";
 import { executeRollSequence } from "../roll-sequence.js";
+import { getUnknownTargetLabelKey } from "../targeting.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -73,9 +74,12 @@ export class RecallKnowledgeDialog extends HandlebarsApplicationMixin(Applicatio
     return {
       // Never the real name here — the dialog always renders before a roll
       // has happened, so identity hasn't been earned yet (SPEC.md §6.2).
-      targetName: game.i18n.localize("RKA.UnknownTarget"),
-      targetImg: this.#targetActor.img,
+      targetName: game.i18n.localize(getUnknownTargetLabelKey(this.#targetActor)),
+      // The token art the player already sees on the canvas, not the actor
+      // portrait, which can give away more than the token does.
+      targetImg: this.#targetToken.document.texture.src,
       skills,
+      noSkills: skills.length === 0,
       categories,
       blocked,
       canRoll: !blocked && Boolean(this.#selectedSkill),

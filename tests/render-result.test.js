@@ -57,6 +57,11 @@ describe("renderResultChatMessage", () => {
     expect(renderTemplateSpy).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({ targetName: "RKA.UnknownTarget" }));
   });
 
+  it("hides an unidentified hazard behind 'RKA.UnknownHazard'", async () => {
+    await renderResultChatMessage(baseArgs({ degree: DEGREES.FAILURE, targetActor: { name: "Hidden Pit", type: "hazard" } }));
+    expect(renderTemplateSpy).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({ targetName: "RKA.UnknownHazard" }));
+  });
+
   it("creates a public chat message with no dc/rollTotal/degree in its content context", async () => {
     await renderResultChatMessage(baseArgs());
     expect(createCalls[0]).toEqual({ speaker: { alias: "Rolling PC" }, content: "<div>rendered</div>" });

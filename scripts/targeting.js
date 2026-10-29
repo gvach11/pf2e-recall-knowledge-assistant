@@ -28,3 +28,11 @@ export function getValidatedSingleTarget() {
 
   return token;
 }
+
+/**
+ * The placeholder shown instead of an unidentified target's real name.
+ * A trap isn't a creature, and calling it one would mislead the player.
+ */
+export function getUnknownTargetLabelKey(actor) {
+  return actor?.type === "hazard" ? "RKA.UnknownHazard" : "RKA.UnknownTarget";
+}

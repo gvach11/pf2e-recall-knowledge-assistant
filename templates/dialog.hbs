@@ -22,6 +22,9 @@
 
     <section class="rka-skills">
       <h3>{{localize "RKA.Dialog.SkillHeading"}}</h3>
+      {{#if noSkills}}
+        <p class="rka-no-skills">{{localize "RKA.Dialog.NoSkills"}}</p>
+      {{/if}}
       <div class="rka-skill-list">
         {{#each skills}}
           <label class="rka-skill-option rka-likelihood-{{this.likelihood}} {{#if this.selected}}selected{{/if}}">

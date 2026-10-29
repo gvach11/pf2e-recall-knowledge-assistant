@@ -6,7 +6,7 @@ import {
   generateFalseInfo,
 } from "../scripts/data/false-info.js";
 import { CATEGORIES, makeFactKey } from "../scripts/constants.js";
-import { CREATURE_TRAIT_SKILLS } from "../scripts/data/trait-skill-map.js";
+import { CREATURE_TRAIT_SKILLS, HAZARD_TRAIT_SKILLS } from "../scripts/data/trait-skill-map.js";
 
 const richFacts = {
   name: "Test Ghoul",
@@ -116,6 +116,15 @@ describe("pickFalseTrait", () => {
       expect(result).not.toBeNull();
       expect(richFacts.traits).not.toContain(result.text);
       expect(Object.keys(CREATURE_TRAIT_SKILLS)).toContain(result.text);
+    }
+  });
+
+  it("lies about a hazard with a hazard trait, never a creature type", () => {
+    const pit = { ...emptyFacts, kind: "hazard", traits: ["trap", "mechanical"] };
+    for (let i = 0; i < 25; i++) {
+      const result = pickFalseTrait(pit, () => i / 25);
+      expect(Object.keys(HAZARD_TRAIT_SKILLS)).toContain(result.text);
+      expect(pit.traits).not.toContain(result.text);
     }
   });
 

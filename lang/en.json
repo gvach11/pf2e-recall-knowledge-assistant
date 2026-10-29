@@ -4,11 +4,13 @@
       "Title": "Recall Knowledge"
     },
     "UnknownTarget": "Unknown Creature",
+    "UnknownHazard": "Unknown Hazard",
     "Dialog": {
       "Title": "Recall Knowledge",
       "CategoryHeading": "What are you trying to recall?",
       "SkillHeading": "Choose a skill",
-      "RollButton": "Roll"
+      "RollButton": "Roll",
+      "NoSkills": "None of your skills seem relevant to this."
     },
     "Category": {
       "weaknesses": "Weaknesses",

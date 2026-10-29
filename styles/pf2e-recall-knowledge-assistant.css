@@ -65,7 +65,8 @@
   color: #fff;
 }
 
-.rka-blocked-warning {
+.rka-blocked-warning,
+.rka-no-skills {
   font-style: italic;
   opacity: 0.8;
 }

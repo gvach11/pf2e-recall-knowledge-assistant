@@ -1,4 +1,5 @@
 import { IDENTIFYING_DEGREES, MODULE_ID } from "../constants.js";
+import { getUnknownTargetLabelKey } from "../targeting.js";
 
 const TEMPLATE_PATH = `modules/${MODULE_ID}/templates/chat-result.hbs`;
 
@@ -28,7 +29,7 @@ export async function renderResultChatMessage({
   const headerName =
     IDENTIFYING_DEGREES.has(degree) || alreadyIdentified
       ? targetActor.name
-      : game.i18n.localize("RKA.UnknownTarget");
+      : game.i18n.localize(getUnknownTargetLabelKey(targetActor));
 
   const baseline = reveal.baseline
     ? game.i18n.format("RKA.Chat.Baseline", {

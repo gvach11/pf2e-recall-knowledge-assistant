@@ -25,3 +25,26 @@ export const CREATURE_TRAIT_SKILLS = Object.freeze({
   time: ["occultism"],
   undead: ["religion"],
 });
+
+// Hazards have no identification table. Each entry is derived from AoN
+// (checked 2026-10-29): Crafting covers engineering and mechanical things
+// (Skills ID=37); magical hazards are learned via Identify Magic / Recall
+// Knowledge (Rules ID=2847), i.e. the tradition's skill; "haunts can often
+// be overcome with Occultism or Religion" (Rules ID=668); environmental
+// hazards are natural phenomena, so Nature (Survival disables them but
+// isn't a Recall Knowledge skill). A bare "trap" says nothing about how it
+// works, so it has no entry. Also the pool for false hazard traits.
+export const HAZARD_TRAIT_SKILLS = Object.freeze({
+  mechanical: ["crafting"],
+  magical: ["arcana", "nature", "occultism", "religion"],
+  haunt: ["occultism", "religion"],
+  environmental: ["nature"],
+  arcane: ["arcana"],
+  divine: ["religion"],
+  occult: ["occultism"],
+  primal: ["nature"],
+});
+
+// A tradition trait pins a magical hazard to one skill, so the generic
+// "any tradition" `magical` entry no longer applies.
+export const TRADITION_TRAITS = Object.freeze(["arcane", "divine", "occult", "primal"]);

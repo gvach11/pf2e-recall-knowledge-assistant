@@ -1,5 +1,5 @@
 import { CATEGORIES, makeFactKey } from "./constants.js";
-import { CREATURE_TRAIT_SKILLS } from "./data/trait-skill-map.js";
+import { CREATURE_TRAIT_SKILLS, HAZARD_TRAIT_SKILLS, TRADITION_TRAITS } from "./data/trait-skill-map.js";
 
 /**
  * Normalizes a live pf2e NPC/Hazard actor document into a plain data shape
@@ -21,6 +21,7 @@ export function getActorFacts(actor) {
   const { weaknessTypes = {}, resistanceTypes = {} } = globalThis.CONFIG?.PF2E ?? {};
   return {
     name: actor.name,
+    kind: actor.type,
     traits: [...(actor.system?.traits?.value ?? [])],
     weaknesses: (attributes.weaknesses ?? []).map((w) => ({
       type: w.type,
@@ -147,16 +148,19 @@ export function pickIdentityTrait(traits) {
 /**
  * Relevant skills for Recall Knowledge against this target. NPCs delegate
  * to pf2e's own live `identificationDCs.skills`; Hazards lack that getter,
- * so we derive relevance from the shared creature-trait->skill map.
+ * so we derive relevance from the trait->skill maps — creature types plus,
+ * for hazards, the hazard-type map (see trait-skill-map.js).
  */
 export function getRelevantSkills(actor, facts) {
   if (actor.type === "npc" && Array.isArray(actor.identificationDCs?.skills)) {
     return [...actor.identificationDCs.skills];
   }
 
+  const hasTradition = facts.traits.some((trait) => TRADITION_TRAITS.includes(trait));
   const skills = new Set();
   for (const trait of facts.traits) {
-    for (const skill of CREATURE_TRAIT_SKILLS[trait] ?? []) {
+    const hazardSkills = actor.type === "hazard" && !(trait === "magical" && hasTradition) ? HAZARD_TRAIT_SKILLS[trait] : undefined;
+    for (const skill of [...(CREATURE_TRAIT_SKILLS[trait] ?? []), ...(hazardSkills ?? [])]) {
       skills.add(skill);
     }
   }
