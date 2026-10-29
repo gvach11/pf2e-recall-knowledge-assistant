@@ -33,9 +33,41 @@ describe("resolveReveal", () => {
 
   it("critical failure on an ALREADY-IDENTIFIED target reveals one false fact and records no new (true) keys", () => {
     const reveal = resolveReveal(facts, CATEGORIES.WEAKNESSES, DEGREES.CRITICAL_FAILURE, new Set(), true, () => 0);
-    expect(reveal.baseline).toBeNull();
     expect(reveal.facts).toHaveLength(1);
     expect(reveal.revealedKeys).toEqual([]);
+  });
+
+  it("a lie carries the same baseline sentence a Success would, so it reads like one", () => {
+    const success = resolveReveal(facts, CATEGORIES.WEAKNESSES, DEGREES.SUCCESS, new Set(), true, () => 0);
+    const lie = resolveReveal(facts, CATEGORIES.WEAKNESSES, DEGREES.CRITICAL_FAILURE, new Set(), true, () => 0);
+    expect(lie.baseline).toEqual(success.baseline);
+  });
+
+  it("a lie with nothing safe to claim in the chosen category says nothing notable, like an empty Success", () => {
+    // Asked about weaknesses; the only resistance can't be a pf2e weakness
+    // type, so no believable false weakness exists. Must not answer with a
+    // trait or a resistance instead.
+    const noInvertible = { ...facts, weaknesses: [], resistances: [], immunities: [{ type: "unconscious", label: "unconscious", invertible: false }] };
+    for (let i = 0; i < 25; i++) {
+      const lie = resolveReveal(noInvertible, CATEGORIES.WEAKNESSES, DEGREES.CRITICAL_FAILURE, new Set(), true, () => i / 25);
+      expect(lie.baseline).not.toBeNull();
+      expect(lie.facts).toEqual([]);
+    }
+  });
+
+  it("a plain Success on an empty category says nothing notable instead of answering a different category", () => {
+    const onlyTraits = { name: "Werewolf", traits: ["beast", "werecreature"], weaknesses: [], resistances: [], immunities: [] };
+    for (let i = 0; i < 25; i++) {
+      const reveal = resolveReveal(onlyTraits, CATEGORIES.RESISTANCES, DEGREES.SUCCESS, new Set(), false, () => i / 25);
+      expect(reveal.facts).toEqual([]);
+      expect(reveal.revealedKeys).toEqual([]);
+    }
+  });
+
+  it("a Critical Success on an empty category still falls back to another category", () => {
+    const onlyTraits = { name: "Werewolf", traits: ["beast", "werecreature"], weaknesses: [], resistances: [], immunities: [] };
+    const reveal = resolveReveal(onlyTraits, CATEGORIES.RESISTANCES, DEGREES.CRITICAL_SUCCESS, new Set(), false, () => 0);
+    expect(reveal.facts).toEqual(["werecreature"]);
   });
 
   it("critical failure on a target NOT YET identified is treated exactly like a Failure — no baseline, no fact, real or false", () => {

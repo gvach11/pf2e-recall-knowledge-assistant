@@ -126,10 +126,17 @@ describe("pickFalseTrait", () => {
 });
 
 describe("generateFalseInfo", () => {
-  it("falls back to a false trait when the chosen IWR category has nothing to invert", () => {
-    const result = generateFalseInfo(emptyFacts, CATEGORIES.WEAKNESSES, new Set(), () => 0);
-    expect(result).not.toBeNull();
-    expect(result.category).toBe(CATEGORIES.TRAITS);
+  it("returns null rather than switching to a false trait when the chosen IWR category has nothing to invert", () => {
+    // A false trait is always available here, but a Success never answers
+    // a different category than the one asked, so a lie mustn't either.
+    expect(generateFalseInfo(emptyFacts, CATEGORIES.WEAKNESSES, new Set(), () => 0)).toBeNull();
+  });
+
+  it("only ever answers the category that was asked", () => {
+    for (let i = 0; i < 25; i++) {
+      expect(generateFalseInfo(richFacts, CATEGORIES.WEAKNESSES, new Set(), () => i / 25).category).toBe(CATEGORIES.WEAKNESSES);
+      expect(generateFalseInfo(richFacts, CATEGORIES.TRAITS, new Set(), () => i / 25).category).toBe(CATEGORIES.TRAITS);
+    }
   });
 
   it("uses the chosen category's inversion when material exists", () => {
@@ -149,16 +156,11 @@ describe("generateFalseInfo", () => {
     }
   });
 
-  it("falls back through every category and returns null if truly nothing is safe to invent", () => {
-    // Every IWR fact already revealed, and every possible trait already
-    // actually possessed by the target (so no false trait is available
-    // either) — nothing safe left to claim.
-    const allTraits = { ...richFacts, traits: Object.keys(CREATURE_TRAIT_SKILLS) };
+  it("returns null when every candidate in the chosen category is already known to be true", () => {
     const revealedKeys = new Set([
-      makeFactKey(CATEGORIES.WEAKNESSES, "fire"),
       makeFactKey(CATEGORIES.RESISTANCES, "cold"),
       makeFactKey(CATEGORIES.RESISTANCES, "poison"),
     ]);
-    expect(generateFalseInfo(allTraits, CATEGORIES.WEAKNESSES, revealedKeys, () => 0)).toBeNull();
+    expect(generateFalseInfo(richFacts, CATEGORIES.WEAKNESSES, revealedKeys, () => 0)).toBeNull();
   });
 });

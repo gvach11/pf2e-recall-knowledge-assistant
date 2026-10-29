@@ -70,29 +70,17 @@ export function pickFalseTrait(facts, rng = Math.random) {
   return { category: CATEGORIES.TRAITS, text: trait };
 }
 
-function tryFalseInfoForCategory(facts, category, revealedKeys, rng) {
+/**
+ * Generates one false fact in the chosen category, presented with the same
+ * confidence/formatting as a real reveal. Never answers a different
+ * category: a Success doesn't either, so a lie that did would be a tell.
+ * Returns null when the chosen category has nothing safe to invert (empty,
+ * not a believable pf2e type, or already revealed true to this character);
+ * the caller then says "nothing notable", exactly as an empty Success does
+ * (SPEC.md §6.4).
+ */
+export function generateFalseInfo(facts, category, revealedKeys = new Set(), rng = Math.random) {
   if (category === CATEGORIES.WEAKNESSES) return invertToFalseWeakness(facts, revealedKeys, rng);
   if (category === CATEGORIES.RESISTANCES) return invertToFalseResistance(facts, revealedKeys, rng);
   return pickFalseTrait(facts, rng);
-}
-
-/**
- * Generates one false fact for the chosen category, presented with the same
- * confidence/formatting as a real reveal. If the chosen category has
- * nothing safe to invert (either empty, or every candidate's true fact was
- * already revealed to this character), falls back through the other
- * categories in random order. Returns null only if nothing safe remains
- * anywhere — the caller treats that like a Failure for this attempt rather
- * than force a contradictory or invented lie (SPEC.md §6.4).
- */
-export function generateFalseInfo(facts, category, revealedKeys = new Set(), rng = Math.random) {
-  const others = Object.values(CATEGORIES)
-    .filter((c) => c !== category)
-    .sort(() => rng() - 0.5);
-
-  for (const cat of [category, ...others]) {
-    const result = tryFalseInfoForCategory(facts, cat, revealedKeys, rng);
-    if (result) return result;
-  }
-  return null;
 }

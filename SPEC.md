@@ -236,7 +236,7 @@ info-dump.
 | Critical Success | Always include the baseline name/type confirmation, plus reveal **2** pieces of info: 1 from the chosen category (or, if that category is empty for this target, from a randomly-picked other relevant category), plus 1 more from a **randomly-picked other relevant category** as the "subtler" bonus fact. |
 | Success | Always include the baseline name/type confirmation, plus reveal **1** piece of info in the chosen category. If the category is empty for this target, the category-specific part says so explicitly (e.g. "nothing notable in that regard") — the baseline confirmation is still given, so a success never yields zero information. |
 | Failure | No information revealed. Chat/dialog clearly says "you recall nothing certain." |
-| Critical Failure | **If the target is already identified** (this character earned it on an earlier attempt this encounter): reveal **1 false** piece of info in the chosen category, presented with the same confidence/formatting as real info (player isn't told it's false). **If the target is not yet identified**: treated exactly like Failure — no information revealed at all, real or false. A specific false claim about a creature whose identity is unknown is an inherent tell (RAW itself permits Critical Failure to "give no information, as on a failure"). |
+| Critical Failure | **If the target is already identified** (this character earned it on an earlier attempt this encounter): the result is shaped **exactly like a Success** — the same true baseline name/type confirmation, plus **1 false** piece of info in the chosen category (player isn't told it's false). If no safe false fact exists in the chosen category (§6.4), the category-specific part says "nothing notable in that regard", just as an empty Success does; it never answers a different category. **If the target is not yet identified**: treated exactly like Failure — no information revealed at all, real or false. A specific false claim about a creature whose identity is unknown is an inherent tell (RAW itself permits Critical Failure to "give no information, as on a failure"). |
 
 ### 6.4 False Information Generation (critical failure)
 - **Only applies once the target is already identified** this encounter
@@ -247,21 +247,21 @@ info-dump.
   trait/immunity it doesn't have. Needs a per-category inversion rule:
   - Weaknesses ↔ Resistances/Immunities: swap direction on an existing
     entry, or assert a weakness to a type the creature actually resists.
+    Only types pf2e itself recognizes as weakness (resp. resistance)
+    types qualify — many immunities are conditions or effects
+    ("unconscious", "death effects") that no creature can be weak to, and
+    a lie built from one would be an obvious tell.
   - **Must never contradict a fact already truthfully revealed** to this
     character about this target earlier in the same encounter (tracked
-    alongside the repeat-attempt state, §6.6). If the chosen category's
-    real material is fully excluded by what's already known, fall back
-    through the other categories (still excluding already-known facts);
-    if nothing safe remains anywhere, treat that attempt like a Failure
-    (no info) rather than force a contradictory or invented lie.
+    alongside the repeat-attempt state, §6.6).
   - Traits: pick a false trait from the same fixed creature-type trait list
     used for skill relevance (§2), excluding traits the target actually
     has, rather than an arbitrary/nonsense trait.
-  - **Empty-data fallback**: if the chosen category is Weaknesses or
-    Resistances/Immunities but the target has no real entries there to
-    invert (nothing to flip), fall back to a false trait instead, so the
-    falsehood is always grounded in real data rather than invented from
-    nothing.
+  - **Stays in the chosen category.** If the chosen category has nothing
+    safe to invert (empty, no believable type, or everything already
+    known), the lie is "nothing notable in that regard" with the usual
+    baseline — never a fact from another category, since a Success never
+    answers a different category and doing so would expose the lie.
 
 ### 6.5 GM Visibility & Control
 - Reveal is **fully automatic** — no GM approval step in the reveal flow

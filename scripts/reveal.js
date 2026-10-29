@@ -9,7 +9,7 @@ import { generateFalseInfo } from "./data/false-info.js";
  *   pre-built string — see architecture report S7/F15), or null if this
  *   degree reveals no baseline.
  * @property {string[]} facts - Already-formatted fact display strings
- *   (real or, on an unidentified-then-critical-failure, false).
+ *   (real, or false on a critical failure against an identified target).
  * @property {string[]} revealedKeys - New true-fact keys earned by this
  *   attempt only, for the caller to persist via `repeat-attempts.js`.
  */
@@ -31,34 +31,35 @@ import { generateFalseInfo } from "./data/false-info.js";
  * exactly like a Failure — no baseline, no fact, real or false. This
  * avoids an inherent tell ("confident about a specific detail of a
  * creature you don't know the identity of") that can't otherwise be
- * disguised. Once identified, Critical Failure resumes giving one false,
- * non-contradictory fact as before.
+ * disguised. Once identified, Critical Failure gives a lie shaped exactly
+ * like a Success: the same (true) baseline sentence plus one false,
+ * non-contradictory fact in the chosen category — or, when no safe lie
+ * exists there, no fact, which renders as "nothing notable" just like an
+ * empty Success.
  *
  * @returns {Reveal}
  */
 export function resolveReveal(facts, category, degree, revealedKeys = new Set(), alreadyIdentified = false, rng = Math.random) {
-  if (degree === DEGREES.CRITICAL_FAILURE && !alreadyIdentified) {
-    return { baseline: null, facts: [], revealedKeys: [] };
-  }
-
-  if (degree === DEGREES.CRITICAL_FAILURE) {
-    const falseFact = generateFalseInfo(facts, category, revealedKeys, rng);
-    return { baseline: null, facts: falseFact ? [falseFact.text] : [], revealedKeys: [] };
-  }
-
-  if (degree === DEGREES.FAILURE) {
+  if (degree === DEGREES.FAILURE || (degree === DEGREES.CRITICAL_FAILURE && !alreadyIdentified)) {
     return { baseline: null, facts: [], revealedKeys: [] };
   }
 
   const identityTrait = pickIdentityTrait(facts.traits);
   const baseline = { name: facts.name, trait: identityTrait };
+
+  if (degree === DEGREES.CRITICAL_FAILURE) {
+    const falseFact = generateFalseInfo(facts, category, revealedKeys, rng);
+    return { baseline, facts: falseFact ? [falseFact.text] : [], revealedKeys: [] };
+  }
   // The baseline already states this trait; offering it again as the
   // Traits fact would spend the reveal on something the player just read.
   const statedKeys = new Set([makeFactKey(CATEGORIES.TRAITS, identityTrait)]);
 
   const usedCategories = [category];
   let primaryEntry = pickCategoryEntry(facts, category, rng, statedKeys);
-  if (!primaryEntry) {
+  // Only a Critical Success substitutes another category for an empty one;
+  // a plain Success says "nothing notable" (SPEC.md §6.3).
+  if (!primaryEntry && degree === DEGREES.CRITICAL_SUCCESS) {
     primaryEntry = pickFactFromOtherCategory(facts, usedCategories, rng, statedKeys);
     if (primaryEntry) usedCategories.push(primaryEntry.category);
   }
