@@ -226,6 +226,10 @@
 - **Explanation:** The `{ baseline, facts, isFalse, revealedKeys }` shape produced by `resolveReveal` is consumed via plain field access across 4 files with no shared type/schema definition — a shape change would require coordinated edits across all of them. Low impact given the module's small size makes this easy to verify by hand.
 - **Evidence:** `scripts/reveal.js:29-69` (producer); `scripts/repeat-attempts.js:72-87`, `scripts/applications/recall-knowledge-dialog.js:127-139`, `scripts/chat/render-result.js:17-53` (consumers).
 - **Found by:** Structure & Boundaries specialist; verified.
+- **Status:** Fixed
+- **Status reason:** The F4 (dialog→`roll-sequence.js` extraction) and F10/F15 fixes already shrank the real contract surface to two production touchpoints: `reveal.js` (producer) and `render-result.js` (the one consumer that destructures `baseline`/`facts`; `roll-sequence.js` only forwards the whole object and reads `revealedKeys`). Added a `@typedef {Object} Reveal` JSDoc block in `reveal.js` documenting `{ baseline, facts, revealedKeys }`, referenced via `@returns {Reveal}` on `resolveReveal` and `@param {{reveal: import("../reveal.js").Reveal}}` on `renderResultChatMessage` — a shape change is now a one-place edit with editor-visible type-checking across the boundary, without introducing a build step or runtime schema library disproportionate to the module's size.
+- **Status date:** 2026-10-29
+- **Status commit:** pending (see fix-architecture session commit)
 
 ### [F15] Baseline reveal sentence is a hardcoded English string, not routed through `game.i18n`
 - **Category:** Flaw 25 (Business logic in the UI — presentation logic embedded in the domain layer)

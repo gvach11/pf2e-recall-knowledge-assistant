@@ -13,6 +13,8 @@ const TEMPLATE_PATH = `modules/${MODULE_ID}/templates/chat-result.hbs`;
  * attempt this encounter (`alreadyIdentified`) — a later failure must not
  * make an already-known identity look forgotten. The identity reveal
  * itself happens via the baseline text ("X is a Y."), not the header.
+ *
+ * @param {{reveal: import("../reveal.js").Reveal}} args
  */
 export async function renderResultChatMessage({
   degree,

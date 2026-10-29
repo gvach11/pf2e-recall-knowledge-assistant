@@ -3,6 +3,18 @@ import { pickCategoryEntry, pickFactFromOtherCategory } from "./actor-data.js";
 import { generateFalseInfo } from "./data/false-info.js";
 
 /**
+ * @typedef {Object} Reveal
+ * @property {{name: string, trait: string}|null} baseline - Structured
+ *   identity-sentence data for the presentation layer to format (never a
+ *   pre-built string — see architecture report S7/F15), or null if this
+ *   degree reveals no baseline.
+ * @property {string[]} facts - Already-formatted fact display strings
+ *   (real or, on an unidentified-then-critical-failure, false).
+ * @property {string[]} revealedKeys - New true-fact keys earned by this
+ *   attempt only, for the caller to persist via `repeat-attempts.js`.
+ */
+
+/**
  * Resolves what to reveal for a given degree of success (SPEC.md §6.3).
  * A success/critical success always includes baseline info; "nothing
  * notable" only ever applies to the category-specific part.
@@ -22,15 +34,7 @@ import { generateFalseInfo } from "./data/false-info.js";
  * disguised. Once identified, Critical Failure resumes giving one false,
  * non-contradictory fact as before.
  *
- * Returns `{ baseline, facts, revealedKeys }`, where the returned
- * `revealedKeys` are the *new* true-fact keys earned by this attempt only
- * (empty for Failure/Critical Failure), for the caller to persist.
- *
- * `baseline` is `{ name, trait }` structured data, not a formatted sentence
- * — this module has no Foundry globals (see architecture report S7), so
- * composing the actual display string (including `game.i18n` and the
- * language-specific "a"/"an" article) is left to the presentation layer
- * (see `chat/render-result.js`).
+ * @returns {Reveal}
  */
 export function resolveReveal(facts, category, degree, revealedKeys = new Set(), alreadyIdentified = false, rng = Math.random) {
   if (degree === DEGREES.CRITICAL_FAILURE && !alreadyIdentified) {
