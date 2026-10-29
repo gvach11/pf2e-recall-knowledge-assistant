@@ -1,5 +1,5 @@
-import { DEGREES, makeFactKey } from "./constants.js";
-import { pickCategoryEntry, pickFactFromOtherCategory } from "./actor-data.js";
+import { CATEGORIES, DEGREES, makeFactKey } from "./constants.js";
+import { pickCategoryEntry, pickFactFromOtherCategory, pickIdentityTrait } from "./actor-data.js";
 import { generateFalseInfo } from "./data/false-info.js";
 
 /**
@@ -50,13 +50,16 @@ export function resolveReveal(facts, category, degree, revealedKeys = new Set(),
     return { baseline: null, facts: [], revealedKeys: [] };
   }
 
-  const primaryTrait = facts.traits[0] ?? "creature";
-  const baseline = { name: facts.name, trait: primaryTrait };
+  const identityTrait = pickIdentityTrait(facts.traits);
+  const baseline = { name: facts.name, trait: identityTrait };
+  // The baseline already states this trait; offering it again as the
+  // Traits fact would spend the reveal on something the player just read.
+  const statedKeys = new Set([makeFactKey(CATEGORIES.TRAITS, identityTrait)]);
 
   const usedCategories = [category];
-  let primaryEntry = pickCategoryEntry(facts, category, rng);
+  let primaryEntry = pickCategoryEntry(facts, category, rng, statedKeys);
   if (!primaryEntry) {
-    primaryEntry = pickFactFromOtherCategory(facts, usedCategories, rng);
+    primaryEntry = pickFactFromOtherCategory(facts, usedCategories, rng, statedKeys);
     if (primaryEntry) usedCategories.push(primaryEntry.category);
   }
 
@@ -68,7 +71,7 @@ export function resolveReveal(facts, category, degree, revealedKeys = new Set(),
   }
 
   if (degree === DEGREES.CRITICAL_SUCCESS) {
-    const bonus = pickFactFromOtherCategory(facts, usedCategories, rng);
+    const bonus = pickFactFromOtherCategory(facts, usedCategories, rng, statedKeys);
     if (bonus) {
       revealed.push(bonus.text);
       newKeys.push(makeFactKey(bonus.category, bonus.key));

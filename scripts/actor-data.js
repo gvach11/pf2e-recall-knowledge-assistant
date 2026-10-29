@@ -1,4 +1,4 @@
-import { CATEGORIES } from "./constants.js";
+import { CATEGORIES, makeFactKey } from "./constants.js";
 import { CREATURE_TRAIT_SKILLS } from "./data/trait-skill-map.js";
 
 /**
@@ -80,10 +80,12 @@ function pickRandom(list, rng) {
  * and text together — needed wherever the caller must remember exactly
  * which fact was revealed (e.g. to persist it and never contradict it
  * later). Returns null if that category is empty for this target (the
- * "nothing notable" case, §6.3).
+ * "nothing notable" case, §6.3). Facts whose `makeFactKey` is in
+ * `excludedKeys` are skipped, so a fact already stated elsewhere in the same
+ * result is never offered again.
  */
-export function pickCategoryEntry(facts, category, rng = Math.random) {
-  const entries = listCategoryEntries(facts, category);
+export function pickCategoryEntry(facts, category, rng = Math.random, excludedKeys = new Set()) {
+  const entries = listCategoryEntries(facts, category).filter((entry) => !excludedKeys.has(makeFactKey(category, entry.key)));
   const entry = pickRandom(entries, rng);
   return entry ? { category, key: entry.key, text: entry.text } : null;
 }
@@ -97,15 +99,33 @@ export function pickCategoryEntry(facts, category, rng = Math.random) {
  * duplicate a fact already shown. Returns null only if every non-excluded
  * category is empty for this target.
  */
-export function pickFactFromOtherCategory(facts, excludedCategories, rng = Math.random) {
+export function pickFactFromOtherCategory(facts, excludedCategories, rng = Math.random, excludedKeys = new Set()) {
   const excluded = new Set(Array.isArray(excludedCategories) ? excludedCategories : [excludedCategories]);
   const candidates = Object.values(CATEGORIES).filter((c) => !excluded.has(c));
   const shuffled = [...candidates].sort(() => rng() - 0.5);
   for (const category of shuffled) {
-    const entry = pickCategoryEntry(facts, category, rng);
+    const entry = pickCategoryEntry(facts, category, rng, excludedKeys);
     if (entry) return entry;
   }
   return null;
+}
+
+// Not creature types, but what a hazard "is" for the baseline sentence.
+const HAZARD_IDENTITY_TRAITS = ["haunt", "trap"];
+
+/**
+ * The trait the baseline sentence names ("X is a Y."). pf2e stores traits
+ * alphabetically, so the first one is often a descriptor ("mindless"); the
+ * creature type from the identification table (or a hazard's type) is what
+ * actually identifies the target.
+ */
+export function pickIdentityTrait(traits) {
+  return (
+    traits.find((trait) => trait in CREATURE_TRAIT_SKILLS) ??
+    traits.find((trait) => HAZARD_IDENTITY_TRAITS.includes(trait)) ??
+    traits[0] ??
+    "creature"
+  );
 }
 
 /**

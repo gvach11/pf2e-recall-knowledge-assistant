@@ -5,6 +5,7 @@ import {
   pickCategoryEntry,
   pickFactFromOtherCategory,
   getRelevantSkills,
+  pickIdentityTrait,
 } from "../scripts/actor-data.js";
 import { CATEGORIES } from "../scripts/constants.js";
 
@@ -40,6 +41,23 @@ describe("pickFactFromOtherCategory", () => {
     const onlyTraits = { name: "X", traits: ["undead"], weaknesses: [], resistances: [], immunities: [] };
     const result = pickFactFromOtherCategory(onlyTraits, CATEGORIES.WEAKNESSES);
     expect(result.key).toBe("undead");
+  });
+});
+
+describe("pickIdentityTrait", () => {
+  it("prefers a creature-type trait over whatever sorts first", () => {
+    expect(pickIdentityTrait(["mindless", "undead", "unholy", "zombie"])).toBe("undead");
+    expect(pickIdentityTrait(["leshy", "plant"])).toBe("plant");
+  });
+
+  it("names a hazard by its hazard type", () => {
+    expect(pickIdentityTrait(["mechanical", "trap"])).toBe("trap");
+    expect(pickIdentityTrait(["haunt"])).toBe("haunt");
+  });
+
+  it("falls back to the first trait, then to 'creature'", () => {
+    expect(pickIdentityTrait(["foo"])).toBe("foo");
+    expect(pickIdentityTrait([])).toBe("creature");
   });
 });
 

@@ -57,4 +57,25 @@ describe("resolveReveal", () => {
     expect(reveal.baseline).toEqual({ name: "Blank", trait: "creature" });
     expect(reveal.facts).toEqual([]);
   });
+
+  it("names the creature type in the baseline, not the alphabetically-first trait", () => {
+    const zombie = { ...facts, name: "Zombie Shambler", traits: ["mindless", "undead"] };
+    const reveal = resolveReveal(zombie, CATEGORIES.WEAKNESSES, DEGREES.SUCCESS, new Set(), false, () => 0);
+    expect(reveal.baseline.trait).toBe("undead");
+  });
+
+  it("says nothing notable for Traits when the only trait is the one the baseline already named", () => {
+    const unicorn = { name: "Unicorn", traits: ["beast"], weaknesses: [], resistances: [], immunities: [] };
+    const reveal = resolveReveal(unicorn, CATEGORIES.TRAITS, DEGREES.SUCCESS, new Set(), false, () => 0);
+    expect(reveal.baseline.trait).toBe("beast");
+    expect(reveal.facts).toEqual([]);
+  });
+
+  it("never repeats the baseline's trait as the Traits fact", () => {
+    const unicorn = { name: "Unicorn", traits: ["beast", "fey"], weaknesses: [], resistances: [], immunities: [] };
+    for (let i = 0; i < 25; i++) {
+      const reveal = resolveReveal(unicorn, CATEGORIES.TRAITS, DEGREES.SUCCESS, new Set(), false, () => i / 25);
+      expect(reveal.facts).toEqual(["fey"]);
+    }
+  });
 });
