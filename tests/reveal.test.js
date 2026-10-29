@@ -59,4 +59,21 @@ describe("resolveReveal", () => {
     expect(reveal.baseline).toContain("Blank");
     expect(reveal.facts).toEqual([]);
   });
+
+  it("characterization: baseline uses 'a' before a consonant-led trait", () => {
+    const consonantFacts = { ...facts, traits: ["humanoid"] };
+    const reveal = resolveReveal(consonantFacts, CATEGORIES.WEAKNESSES, DEGREES.SUCCESS, new Set(), false);
+    expect(reveal.baseline).toBe("Test Ghoul is a humanoid.");
+  });
+
+  it("characterization: baseline uses 'an' before a vowel-led trait", () => {
+    const reveal = resolveReveal(facts, CATEGORIES.WEAKNESSES, DEGREES.SUCCESS, new Set(), false);
+    expect(reveal.baseline).toBe("Test Ghoul is an undead.");
+  });
+
+  it("characterization: baseline falls back to 'creature' when no traits exist", () => {
+    const noTraitFacts = { ...facts, traits: [] };
+    const reveal = resolveReveal(noTraitFacts, CATEGORIES.WEAKNESSES, DEGREES.SUCCESS, new Set(), false);
+    expect(reveal.baseline).toBe("Test Ghoul is a creature.");
+  });
 });
