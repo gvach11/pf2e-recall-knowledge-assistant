@@ -159,6 +159,10 @@
 - **Explanation:** `localize()` always returns a string in Foundry (the key itself if untranslated), never `null`/`undefined`, so the trailing `?? slug` branch can never execute.
 - **Evidence:** `scripts/applications/recall-knowledge-dialog.js:60` — `statistic?.label ?? game.i18n.localize(...) ?? slug`.
 - **Found by:** Security & Code Quality specialist; verified.
+- **Status:** Fixed
+- **Status reason:** Removed the unreachable `?? slug` fallback in `recall-knowledge-dialog.js`; `game.i18n.localize()` always returns a string per Foundry's API, so the branch could never execute. Zero behavior change, so no new test was needed — the existing suite serves as the regression guard.
+- **Status date:** 2026-10-29
+- **Status commit:** f13fc36
 
 ### [F10] `resolveReveal`'s `isFalse` field is produced but never read downstream
 - **Category:** Flaw 31 (Dead code / unused dependencies)
@@ -191,6 +195,10 @@
 - **Explanation:** `_prepareContext()` and `#onRollSkill` each independently recompute the same deterministic value rather than threading a single computed DC through the dialog's lifecycle. No correctness impact today, but no single source of truth for "the current DC" within one dialog instance.
 - **Evidence:** `scripts/applications/recall-knowledge-dialog.js:52,118` — `computeHiddenDC(this.#targetActor)` called verbatim at both lines.
 - **Found by:** Structure & Boundaries specialist; verified.
+- **Status:** Fixed
+- **Status reason:** By the time this was fixed, the second call site had moved to `scripts/roll-sequence.js:43` (extracted during the F4 fix) rather than staying in the dialog. `RecallKnowledgeDialog` now computes `computeHiddenDC` once in its constructor (`#dc`), reuses that value in `_prepareContext`, and passes it into `executeRollSequence` as a `dc` parameter instead of letting that function recompute it independently — establishing a single source of truth for the DC within one roll cycle.
+- **Status date:** 2026-10-29
+- **Status commit:** f13fc36
 
 ### [F14] "Reveal object" shape is an implicit contract shared across 4 files
 - **Category:** Flaw 9 (Shotgun surgery)
