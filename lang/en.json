@@ -38,7 +38,8 @@
       "MultipleTargets": "Target exactly one creature or hazard — you have more than one targeted.",
       "InvalidTargetType": "Recall Knowledge can only be used on creatures or hazards.",
       "NoRollingActor": "You don't have a character assigned to roll with.",
-      "AlreadyAttempted": "You've learned what you're going to learn about this creature for now."
+      "AlreadyAttempted": "You've learned what you're going to learn about this creature for now.",
+      "NoGmToRecord": "No GM is connected, so this attempt couldn't be recorded for the encounter."
     },
     "Error": {
       "RollFailed": "The Recall Knowledge roll couldn't be completed."

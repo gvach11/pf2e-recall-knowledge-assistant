@@ -24,6 +24,7 @@
       }
     ]
   },
+  "socket": true,
   "esmodules": [
     "scripts/module.js"
   ],

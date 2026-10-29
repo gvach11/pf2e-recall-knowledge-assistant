@@ -68,20 +68,20 @@ export function getRevealedFacts(combat, actorUuid, targetUuid) {
  * `newRevealedKeys` are the stable keys of any true facts revealed by
  * *this* attempt (empty for Failure/Critical Failure) — they're merged
  * into the character's cumulative knowledge of this target.
+ *
+ * Only this pair's own key is written, never the whole map: the GM may be
+ * recording several players' relayed attempts at once (see socket.js), and
+ * a whole-map write would let one land on top of and erase another.
  */
 export async function recordAttempt(combat, actorUuid, targetUuid, degree, newRevealedKeys = []) {
   if (!combat) return;
   const key = attemptKey(actorUuid, targetUuid);
-  const data = combat.getFlag(MODULE_ID, FLAG_KEY) ?? {};
-  const existing = data[key] ?? { count: 0, blocked: false, identified: false, revealedFacts: [] };
-  await combat.setFlag(MODULE_ID, FLAG_KEY, {
-    ...data,
-    [key]: {
-      count: existing.count + 1,
-      lastDegree: degree,
-      blocked: existing.blocked || shouldBlockAfter(degree),
-      identified: existing.identified || IDENTIFYING_DEGREES.has(degree),
-      revealedFacts: [...new Set([...existing.revealedFacts, ...newRevealedKeys])],
-    },
+  const existing = getRecord(combat, actorUuid, targetUuid) ?? { count: 0, blocked: false, identified: false, revealedFacts: [] };
+  await combat.setFlag(MODULE_ID, `${FLAG_KEY}.${key}`, {
+    count: existing.count + 1,
+    lastDegree: degree,
+    blocked: existing.blocked || shouldBlockAfter(degree),
+    identified: existing.identified || IDENTIFYING_DEGREES.has(degree),
+    revealedFacts: [...new Set([...existing.revealedFacts, ...newRevealedKeys])],
   });
 }

@@ -1,6 +1,7 @@
 import { MODULE_ID } from "./constants.js";
 import { registerSceneControl, openRecallKnowledgeDialog } from "./ui/scene-control.js";
 import { ensureHotbarMacro } from "./macro.js";
+import { registerSocket } from "./socket.js";
 
 Hooks.once("init", () => {
   registerSceneControl();
@@ -8,6 +9,7 @@ Hooks.once("init", () => {
 
 Hooks.once("ready", () => {
   game.modules.get(MODULE_ID).api = { openDialog: openRecallKnowledgeDialog };
+  registerSocket();
 
   if (game.user.isGM === false) {
     ensureHotbarMacro();

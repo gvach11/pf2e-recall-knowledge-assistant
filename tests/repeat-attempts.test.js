@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { createFakeCombat } from "./helpers/fake-combat.js";
 import {
   attemptKey,
   shouldBlockAfter,
@@ -25,15 +26,6 @@ describe("shouldBlockAfter", () => {
   });
 });
 
-function createFakeCombat() {
-  const flags = {};
-  return {
-    getFlag: (scope, key) => flags[`${scope}.${key}`],
-    setFlag: async (scope, key, value) => {
-      flags[`${scope}.${key}`] = value;
-    },
-  };
-}
 
 const PC_1 = "Actor.pc1";
 const PC_2 = "Actor.pc2";
@@ -73,6 +65,18 @@ describe("isAttemptBlocked / recordAttempt", () => {
     // PC_2 is a different character rolling against the same target — must
     // stay unblocked regardless of which human/login controls it.
     expect(isAttemptBlocked(combat, PC_2, TARGET_1)).toBe(false);
+  });
+
+  it("recording one character's attempt never overwrites another character's record written at the same moment", async () => {
+    // Two players' attempts relayed to the GM together: both writes are in
+    // flight before either lands, so a whole-map write would drop one.
+    const combat = createFakeCombat();
+    await Promise.all([
+      recordAttempt(combat, PC_1, TARGET_1, DEGREES.FAILURE),
+      recordAttempt(combat, PC_2, TARGET_1, DEGREES.SUCCESS),
+    ]);
+    expect(isAttemptBlocked(combat, PC_1, TARGET_1)).toBe(true);
+    expect(isIdentified(combat, PC_2, TARGET_1)).toBe(true);
   });
 });
 

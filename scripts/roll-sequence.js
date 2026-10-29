@@ -1,5 +1,6 @@
 import { computeDegreeOfSuccess } from "./data/dc-table.js";
-import { isAttemptBlocked, isIdentified, getRevealedFacts, recordAttempt } from "./repeat-attempts.js";
+import { isAttemptBlocked, isIdentified, getRevealedFacts } from "./repeat-attempts.js";
+import { persistAttempt } from "./socket.js";
 import { resolveReveal } from "./reveal.js";
 import { rollRecallKnowledge } from "./roll.js";
 import { renderResultChatMessage } from "./chat/render-result.js";
@@ -63,7 +64,7 @@ export async function executeRollSequence({
       reveal,
     });
 
-    await recordAttempt(combat, actorUuid, targetUuid, degree, reveal.revealedKeys);
+    await persistAttempt(combat, actorUuid, targetUuid, degree, reveal.revealedKeys);
 
     return { outcome: "completed", degree };
   } catch (error) {
