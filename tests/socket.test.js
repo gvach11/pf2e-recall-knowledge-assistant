@@ -44,7 +44,7 @@ describe("persistAttempt", () => {
   });
 
   it("records directly when this user can update the combat (the GM)", async () => {
-    const combat = createFakeCombat({ canModify: true });
+    const combat = createFakeCombat({ isGM: true });
     stubGame({ isGM: true, combat });
 
     expect(await persistAttempt(combat, PC, TARGET, DEGREES.FAILURE, [])).toBe("recorded");
@@ -53,7 +53,7 @@ describe("persistAttempt", () => {
   });
 
   it("relays to the active GM when this user can't update the combat (a player)", async () => {
-    const combat = createFakeCombat({ canModify: false });
+    const combat = createFakeCombat({ isGM: false });
     stubGame({ combat });
 
     const result = await persistAttempt(combat, PC, TARGET, DEGREES.SUCCESS, ["traits:undead"]);
@@ -71,7 +71,7 @@ describe("persistAttempt", () => {
   });
 
   it("warns the player instead of erroring when no GM is connected to record it", async () => {
-    const combat = createFakeCombat({ canModify: false });
+    const combat = createFakeCombat({ isGM: false });
     stubGame({ combat, activeGM: null });
 
     expect(await persistAttempt(combat, PC, TARGET, DEGREES.FAILURE, [])).toBe("unrecorded");

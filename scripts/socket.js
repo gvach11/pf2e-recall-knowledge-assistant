@@ -17,7 +17,10 @@ const VALID_DEGREES = new Set(Object.values(DEGREES));
 export async function persistAttempt(combat, actorUuid, targetUuid, degree, newRevealedKeys = []) {
   if (!combat) return "skipped";
 
-  if (combat.canUserModify(game.user, "update")) {
+  // Combat's update permission depends on which fields change (players may
+  // touch only round/turn/combatants), so ask about the flag write itself —
+  // asked with no data, it answers "yes" for every player.
+  if (combat.canUserModify(game.user, "update", { flags: { [MODULE_ID]: {} } })) {
     await recordAttempt(combat, actorUuid, targetUuid, degree, newRevealedKeys);
     return "recorded";
   }
