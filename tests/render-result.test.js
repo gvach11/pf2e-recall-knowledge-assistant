@@ -67,6 +67,11 @@ describe("renderResultChatMessage", () => {
     expect(createCalls[0]).toEqual({ speaker: { alias: "Rolling PC" }, content: "<div>rendered</div>" });
   });
 
+  it("never hands the degree to the player-facing template, where it would mark a lie in the card's HTML", async () => {
+    await renderResultChatMessage(baseArgs({ degree: DEGREES.CRITICAL_FAILURE, alreadyIdentified: true }));
+    expect(renderTemplateSpy.mock.calls[0][1]).not.toHaveProperty("degree");
+  });
+
   it("creates a second, GM-only message whispered to GM recipients containing the true dc/roll/degree", async () => {
     await renderResultChatMessage(baseArgs({ dc: 22, rollTotal: 30, degree: DEGREES.CRITICAL_SUCCESS }));
     const gmMessage = createCalls[1];

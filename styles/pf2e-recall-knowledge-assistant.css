@@ -75,11 +75,6 @@
   margin: 0.25rem 0 0 1rem;
 }
 
-.rka-chat-result.rka-degree-criticalFailure .rka-baseline,
-.rka-chat-result.rka-degree-criticalFailure .rka-facts {
-  color: inherit;
-}
-
 .rka-gm-detail {
   font-size: 0.85em;
   opacity: 0.85;

@@ -40,8 +40,9 @@ export async function renderResultChatMessage({
     : null;
 
   const content = await foundry.applications.handlebars.renderTemplate(TEMPLATE_PATH, {
+    // No `degree` here: anything in the player's card HTML is readable by
+    // the player, and the degree would mark a critical-failure lie.
     targetName: headerName,
-    degree,
     baseline,
     facts: reveal.facts,
   });
