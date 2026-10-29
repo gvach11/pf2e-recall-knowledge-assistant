@@ -94,10 +94,10 @@
 - **Explanation:** `scripts/applications/recall-knowledge-dialog.js`, `scripts/chat/render-result.js`, `scripts/roll.js`, `scripts/targeting.js`, `scripts/ui/scene-control.js`, and `scripts/macro.js` have no corresponding test files. This is a deliberate, documented scope choice (`PLAN.md`), but it directly explains how [F1] went unnoticed: catching it requires observing chat-message visibility from a genuine second, non-author, non-GM browser session, and `PLAN.md`'s manual QA checklist doesn't call that out explicitly.
 - **Evidence:** `tests/` contains exactly 5 files, all covering the pure-logic layer; none of the 6 Foundry-coupled files above have a test counterpart.
 - **Found by:** Security & Code Quality specialist; verified.
-- **Status:** Partially fixed
-- **Status reason:** `render-result.js` and `roll.js` now have test files (`tests/render-result.test.js`, `tests/roll.test.js`) using `vi.stubGlobal`-mocked Foundry globals. `recall-knowledge-dialog.js`'s core roll sequence was extracted into `scripts/roll-sequence.js` and is covered by `tests/roll-sequence.test.js`; the dialog class itself (ApplicationV2 lifecycle/DOM wiring) remains untested by design, consistent with `PLAN.md`. `targeting.js`, `ui/scene-control.js`, and `macro.js` are still uncovered — out of scope for this fix session (developer chose to scope F2 to the files touched by F1/F4/F5 rather than build a full Foundry API stub harness).
-- **Status date:** 2026-07-02
-- **Status commit:** pending (see fix-architecture session commit)
+- **Status:** Fixed
+- **Status reason:** `render-result.js` and `roll.js` now have test files (`tests/render-result.test.js`, `tests/roll.test.js`) using `vi.stubGlobal`-mocked Foundry globals. `recall-knowledge-dialog.js`'s core roll sequence was extracted into `scripts/roll-sequence.js` and is covered by `tests/roll-sequence.test.js`; the dialog class itself (ApplicationV2 lifecycle/DOM wiring) remains untested by design, consistent with `PLAN.md`. The three remaining gaps (`targeting.js`, `ui/scene-control.js`, `macro.js`) are now covered too (`tests/targeting.test.js`, `tests/scene-control.test.js`, `tests/macro.test.js`), using the same `vi.stubGlobal` characterization pattern.
+- **Status date:** 2026-10-29
+- **Status commit:** c21ebd6
 
 ### [F3] Detectable "tell" in false-info formatting undermines the critical-failure deception
 - **Category:** Flaw 30 (Security as an afterthought)
