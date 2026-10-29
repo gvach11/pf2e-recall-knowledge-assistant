@@ -138,6 +138,10 @@
 - **Explanation:** No `console.*` calls exist anywhere in `scripts/`, and no debug setting is registered. Combined with several silent-failure/fallback paths ([F5] and others), there is no way to distinguish "intentional empty result" from "something broke" in a live game without attaching a debugger.
 - **Evidence:** `grep -r "console\." scripts/` → no matches.
 - **Found by:** Error Handling & Observability specialist; verified.
+- **Status:** Fixed
+- **Status reason:** The F4/F5 fix session already added `console.error(error)` to `executeRollSequence`'s catch block (`scripts/roll-sequence.js`). The one remaining inconsistency was the sibling `!rollResult` branch, which notified the user but didn't log — unlike every other "something broke" path in that function. Added a matching `console.error` call there. A full logging-level/debug-setting system was considered and rejected as disproportionate scope for the one concrete gap found; `tests/roll-sequence.test.js`'s existing "no-roll" test was extended (red/green) to assert the log call.
+- **Status date:** 2026-10-29
+- **Status commit:** pending (see fix-architecture session commit)
 
 ### [F7] `pickCategoryFact` is dead code in production (superseded export)
 - **Category:** Flaw 31 (Dead code / unused dependencies)

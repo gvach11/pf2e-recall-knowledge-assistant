@@ -78,6 +78,7 @@ describe("executeRollSequence", () => {
     expect(result).toEqual({ outcome: "no-roll" });
     expect(ui.notifications.error).toHaveBeenCalledWith("RKA.Error.RollFailed");
     expect(renderResultChatMessage).not.toHaveBeenCalled();
+    expect(consoleErrorSpy).toHaveBeenCalled();
   });
 
   it("completes the full sequence and records the attempt on success", async () => {

@@ -41,6 +41,7 @@ export async function executeRollSequence({
     });
 
     if (!rollResult) {
+      console.error("executeRollSequence: rollRecallKnowledge resolved with no roll result", { actorUuid, targetUuid });
       ui.notifications.error(game.i18n.localize("RKA.Error.RollFailed"));
       return { outcome: "no-roll" };
     }
