@@ -36,6 +36,7 @@ function baseArgs(overrides = {}) {
     selectedSkill: "religion",
     selectedCategory: "weaknesses",
     event: {},
+    dc: 20,
     ...overrides,
   };
 }
@@ -126,5 +127,17 @@ describe("executeRollSequence", () => {
 
     expect(result).toEqual({ outcome: "error" });
     expect(ui.notifications.error).toHaveBeenCalledWith("RKA.Error.RollFailed");
+  });
+
+  it("uses the explicitly passed dc, not a value independently recomputed from the target actor", async () => {
+    // TARGET_ACTOR's own identificationDCs would yield dc=20; passing dc=5
+    // here and asserting SUCCESS (not CRITICAL_FAILURE) proves the caller's
+    // computed dc is what's actually used (architecture report F13).
+    rollRecallKnowledge.mockResolvedValue({ rollTotal: 10, naturalD20: 10 });
+    renderResultChatMessage.mockResolvedValue(undefined);
+
+    const result = await executeRollSequence(baseArgs({ dc: 5 }));
+
+    expect(result.degree).toBe(DEGREES.SUCCESS);
   });
 });
