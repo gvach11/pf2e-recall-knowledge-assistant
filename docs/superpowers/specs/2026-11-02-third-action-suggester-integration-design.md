@@ -287,6 +287,13 @@ With a started encounter, a GM client and a player client:
   they've learned all there is about the nearby enemies. That's the point of
   the feature and reveals nothing beyond "you know it all".
 
+**Decided by the user in final review (2026-11-02):** a Critical Failure lie
+on an identified target still blocks further attempts, as RAW intends ("once
+failed, further attempts are fruitless"; SPEC §4/§6.6). A Success never
+blocks, so the suggestion disappearing after a Success-looking result tells
+the player it was a lie. This is accepted as the cost of following RAW. RKA's
+own dialog already shows the same thing ("already attempted") on reopening.
+
 ## 9. Left to the builder
 
 - Function and file names inside each repo, beyond the API names in §5.

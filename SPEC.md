@@ -343,6 +343,12 @@ away from an empty category to reveal something else doesn't record it, so
 that category stays learnable. Lies are never recorded (§6.4), so
 a critical failure never makes a target look more known than it is.
 
+**Accepted trade-off (RAW over secrecy):** a Critical Failure lie on an
+identified target blocks further attempts like any failure (§6.6), while a
+Success never does. A caller that hides Recall Knowledge for `"blocked"`
+targets therefore lets a player infer that a Success-looking result was a
+lie, as reopening the dialog already does. Kept deliberately to follow RAW.
+
 ## 7. Open Questions
 
 None outstanding — all resolved into §4 Key Decisions.
