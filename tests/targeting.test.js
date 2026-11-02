@@ -108,6 +108,18 @@ describe("validateTargetToken", () => {
     expect(warnSpy).toHaveBeenCalledWith("RKA.Warning.InvalidTargetType");
   });
 
+  it("accepts a TokenDocument and returns its canvas Token, which the dialog needs", () => {
+    const placeable = { actor: { type: "npc" }, document: {} };
+    const tokenDocument = { documentName: "Token", actor: { type: "npc" }, object: placeable };
+    expect(validateTargetToken(tokenDocument)).toBe(placeable);
+    expect(warnSpy).not.toHaveBeenCalled();
+  });
+
+  it("rejects a TokenDocument that isn't on the canvas", () => {
+    expect(validateTargetToken({ documentName: "Token", actor: { type: "npc" }, object: null })).toBeNull();
+    expect(warnSpy).toHaveBeenCalledWith("RKA.Warning.InvalidTargetType");
+  });
+
   it("rejects a token whose actor is gone with the same warning", () => {
     expect(validateTargetToken({ actor: null })).toBeNull();
     expect(warnSpy).toHaveBeenCalledWith("RKA.Warning.InvalidTargetType");

@@ -32,10 +32,13 @@ export function isValidTargetActor(actor) {
 
 /**
  * Checks one specific token as a Recall Knowledge target. Returns the
- * token, or null (after showing a warning notification) if it isn't an
- * NPC or Hazard.
+ * canvas Token, or null (after showing a warning notification) if it isn't
+ * an NPC or Hazard. A TokenDocument (what macros usually hold) is swapped
+ * for its canvas Token, which the dialog renders from; one that isn't on
+ * the canvas is rejected.
  */
 export function validateTargetToken(token) {
+  if (token?.documentName === "Token") token = token.object;
   if (!isValidTargetActor(token?.actor)) {
     ui.notifications.warn(game.i18n.localize("RKA.Warning.InvalidTargetType"));
     return null;
