@@ -336,9 +336,11 @@ learnable fact and every learnable fact is known. Learnable facts are the
 ones a reveal can actually show (§6.3): for Traits, that excludes the
 identity trait, which the baseline sentence states instead. **An empty
 category nobody has asked about still counts as learnable**: learning "it has
-no weaknesses" is worth an action. Only a plain Success records "nothing
-notable"; a Critical Success that switched away from an empty category
-doesn't, so that category stays learnable. Lies are never recorded (§6.4), so
+no weaknesses" is worth an action. "Nothing notable" is recorded whenever the
+player was shown it: by a Success on an empty category, or by a Critical
+Success that found nothing in any category. A Critical Success that switched
+away from an empty category to reveal something else doesn't record it, so
+that category stays learnable. Lies are never recorded (§6.4), so
 a critical failure never makes a target look more known than it is.
 
 ## 7. Open Questions

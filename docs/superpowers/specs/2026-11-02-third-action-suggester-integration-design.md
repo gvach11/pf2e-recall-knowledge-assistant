@@ -158,9 +158,11 @@ A category is exhausted when either:
 
 **An empty category the character hasn't asked about is not exhausted**
 (decided by the user: learning "it has no weaknesses" is worth an action).
-Note that only a plain Success on an empty category records the
-nothing-notable key; a Critical Success that substituted another category
-does not, so that empty category stays learnable.
+Note that the nothing-notable key is recorded only when the player was shown
+"nothing notable" (a Success on an empty category, or a Critical Success that
+found nothing anywhere — the latter fixed in final review); a Critical Success
+that substituted another category does not record it, so that empty category
+stays learnable.
 
 **Learnable entries** must match what `resolveReveal` can actually reveal as
 a fact. For `traits` that means excluding the identity trait
