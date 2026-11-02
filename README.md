@@ -47,6 +47,24 @@ The module has no settings. A GM controls what can be revealed through the NPC's
 
 ---
 
+## Works with Third Action Suggester
+
+With [PF2E Third Action Suggester](https://github.com/gvach11/pf2e-third-action-suggester) 1.1.0 or later, its Recall Knowledge suggestion opens this module's dialog on a character's turn, and only appears while a nearby enemy is still worth an attempt.
+
+---
+
+## For module authors and macros
+
+Once the world is ready, the module publishes an API at `game.modules.get("pf2e-recall-knowledge-assistant").api`:
+
+| Member | What it does |
+|---|---|
+| `apiVersion` | `1`. Check `api.apiVersion >= 1` before using the members below. |
+| `openDialog({ actor, targetToken } = {})` | Opens the dialog. With no arguments it uses the user's single current target and their controlled or assigned character. `actor` must be a character the user owns; `targetToken` must be an NPC or hazard token. |
+| `getAttemptStatus({ actor, targetToken })` | Read-only. `"available"`, `"blocked"` (failed against it this encounter), `"exhausted"` (nothing left to learn), or `"invalid"` (not a character rolling against an NPC or hazard). |
+
+---
+
 ## Compatibility
 
 Requires **Foundry VTT v14** and the **PF2e system 8.1.2** or later.
