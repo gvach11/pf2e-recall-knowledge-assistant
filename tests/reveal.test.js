@@ -133,3 +133,20 @@ describe("resolveReveal", () => {
     }
   });
 });
+
+describe("a Critical Success that finds nothing anywhere", () => {
+  // One trait (its identity trait) and no IWR, like a plain wolf.
+  const wolf = { name: "Wolf", traits: ["animal"], weaknesses: [], resistances: [], immunities: [] };
+
+  it("records nothing notable for the chosen category, as a Success does", () => {
+    const reveal = resolveReveal(wolf, CATEGORIES.TRAITS, DEGREES.CRITICAL_SUCCESS, new Set(), false, () => 0);
+    expect(reveal.facts).toEqual([]);
+    expect(reveal.revealedKeys).toEqual([makeFactKey(CATEGORIES.TRAITS, NOTHING_NOTABLE_KEY)]);
+  });
+
+  it("so a later lie in that category stays nothing notable instead of contradicting it", () => {
+    const known = new Set(resolveReveal(wolf, CATEGORIES.TRAITS, DEGREES.CRITICAL_SUCCESS, new Set(), false, () => 0).revealedKeys);
+    const lie = resolveReveal(wolf, CATEGORIES.TRAITS, DEGREES.CRITICAL_FAILURE, known, true, () => 0);
+    expect(lie.facts).toEqual([]);
+  });
+});

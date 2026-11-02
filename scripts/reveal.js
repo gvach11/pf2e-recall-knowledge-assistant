@@ -69,8 +69,10 @@ export function resolveReveal(facts, category, degree, revealedKeys = new Set(),
   if (primaryEntry) {
     revealed.push(primaryEntry.text);
     newKeys.push(makeFactKey(primaryEntry.category, primaryEntry.key));
-  } else if (degree === DEGREES.SUCCESS) {
-    // "Nothing notable" is itself something the character now knows.
+  } else {
+    // "Nothing notable" is itself something the character now knows. A
+    // Critical Success only gets here when every category came up empty,
+    // so it showed the same "nothing notable" a Success does.
     newKeys.push(makeFactKey(category, NOTHING_NOTABLE_KEY));
   }
 
