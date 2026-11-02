@@ -294,6 +294,53 @@ info-dump.
   without it, a later attempt would present the target as unidentified
   again and could invent false info contradicting an earlier true reveal.
 
+### 6.7 Public API
+Published in the `ready` hook at
+`game.modules.get("pf2e-recall-knowledge-assistant").api`, for macros and
+other modules (first consumer: Third Action Suggester). RKA never depends on
+any of them.
+
+```js
+api = {
+  apiVersion: 1,
+  openDialog({ actor, targetToken } = {}),
+  getAttemptStatus({ actor, targetToken }),  // "available" | "blocked" | "exhausted" | "invalid"
+}
+```
+
+- **`apiVersion`**: an integer feature flag. Callers check
+  `api.apiVersion >= 1`; it changes only when callers must detect a change.
+- **`openDialog`** with no arguments is the scene button / macro behaviour
+  (§6.1): the user's single current target, rolled by `resolveRollingActor()`.
+  A given `targetToken` replaces the user's targets and gets the same
+  NPC/Hazard check. A given `actor` replaces the automatic roller pick; it
+  must be a character the user owns (a GM owns every character), otherwise
+  the user is warned and the dialog doesn't open. It is never silently
+  swapped for another actor.
+- **`getAttemptStatus`** is read-only and answers, in this order:
+  - `"invalid"`: the actor isn't a character, or the token's actor isn't an
+    NPC or Hazard (or either is missing);
+  - `"blocked"`: this character failed against this target earlier this
+    encounter (§6.6);
+  - `"exhausted"`: this character has nothing left to learn about it (below);
+  - `"available"`: anything else, including no started encounter, since
+    nothing is remembered outside one.
+
+  The target is keyed by `targetToken.actor.uuid`, as the dialog does, so
+  each unlinked token is its own target.
+
+**Nothing left to learn** ("exhausted"): the character has identified the
+target **and** every category is answered. A category is answered when a
+Success there reported "nothing notable", or when it has at least one
+learnable fact and every learnable fact is known. Learnable facts are the
+ones a reveal can actually show (§6.3): for Traits, that excludes the
+identity trait, which the baseline sentence states instead. **An empty
+category nobody has asked about still counts as learnable**: learning "it has
+no weaknesses" is worth an action. Only a plain Success records "nothing
+notable"; a Critical Success that switched away from an empty category
+doesn't, so that category stays learnable. Lies are never recorded (§6.4), so
+a critical failure never makes a target look more known than it is.
+
 ## 7. Open Questions
 
 None outstanding — all resolved into §4 Key Decisions.

@@ -1,5 +1,17 @@
 export const MODULE_ID = "pf2e-recall-knowledge-assistant";
 
+// Public API version (SPEC.md §6.7). Bump only when the API changes in a
+// way callers must detect; other modules check `api.apiVersion >= N`.
+export const API_VERSION = 1;
+
+// What getAttemptStatus answers about one character and one target.
+export const ATTEMPT_STATUS = Object.freeze({
+  AVAILABLE: "available",
+  BLOCKED: "blocked",
+  EXHAUSTED: "exhausted",
+  INVALID: "invalid",
+});
+
 export const CATEGORIES = Object.freeze({
   WEAKNESSES: "weaknesses",
   RESISTANCES: "resistances",
