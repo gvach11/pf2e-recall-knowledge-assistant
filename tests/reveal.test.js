@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { resolveReveal } from "../scripts/reveal.js";
+import { isTargetExhausted, resolveReveal } from "../scripts/reveal.js";
 import { CATEGORIES, DEGREES, NOTHING_NOTABLE_KEY, makeFactKey } from "../scripts/constants.js";
 
 const facts = {
@@ -131,5 +131,70 @@ describe("resolveReveal", () => {
       const reveal = resolveReveal(unicorn, CATEGORIES.TRAITS, DEGREES.SUCCESS, new Set(), false, () => i / 25);
       expect(reveal.facts).toEqual(["fey"]);
     }
+  });
+});
+
+describe("isTargetExhausted", () => {
+  const key = makeFactKey;
+  const nothing = (category) => key(category, NOTHING_NOTABLE_KEY);
+  const all = [
+    key(CATEGORIES.WEAKNESSES, "fire"),
+    key(CATEGORIES.RESISTANCES, "cold"),
+    key(CATEGORIES.RESISTANCES, "poison"),
+    nothing(CATEGORIES.TRAITS),
+  ];
+  const without = (list, item) => list.filter((k) => k !== item);
+
+  it("is false until the target is identified", () => {
+    expect(isTargetExhausted(facts, all, false)).toBe(false);
+  });
+
+  it("is true once every category is answered", () => {
+    expect(isTargetExhausted(facts, all, true)).toBe(true);
+  });
+
+  it("an empty category nobody asked about is still worth learning", () => {
+    expect(isTargetExhausted(facts, without(all, nothing(CATEGORIES.TRAITS)), true)).toBe(false);
+  });
+
+  it("an empty weaknesses category counts once a Success reported nothing notable", () => {
+    const noWeaknesses = { ...facts, weaknesses: [] };
+    const known = [key(CATEGORIES.RESISTANCES, "cold"), key(CATEGORIES.RESISTANCES, "poison"), nothing(CATEGORIES.TRAITS)];
+    expect(isTargetExhausted(noWeaknesses, known, true)).toBe(false);
+    expect(isTargetExhausted(noWeaknesses, [...known, nothing(CATEGORIES.WEAKNESSES)], true)).toBe(true);
+  });
+
+  it("one unknown immunity keeps the target learnable", () => {
+    expect(isTargetExhausted(facts, without(all, key(CATEGORIES.RESISTANCES, "poison")), true)).toBe(false);
+  });
+
+  it("the identity trait is never required", () => {
+    const mindless = { ...facts, traits: ["mindless", "undead"] };
+    const known = [...without(all, nothing(CATEGORIES.TRAITS)), key(CATEGORIES.TRAITS, "mindless")];
+    expect(isTargetExhausted(mindless, known, true)).toBe(true);
+  });
+
+  it("a hazard's identity trait is never required", () => {
+    const hazard = { ...facts, kind: "hazard", traits: ["mechanical", "trap"] };
+    const known = [...without(all, nothing(CATEGORIES.TRAITS)), key(CATEGORIES.TRAITS, "mechanical")];
+    expect(isTargetExhausted(hazard, known, true)).toBe(true);
+  });
+
+  it("a target with no traits needs a nothing-notable Traits answer and doesn't throw", () => {
+    const traitless = { ...facts, traits: [] };
+    expect(isTargetExhausted(traitless, without(all, nothing(CATEGORIES.TRAITS)), true)).toBe(false);
+    expect(isTargetExhausted(traitless, all, true)).toBe(true);
+  });
+
+  it("matches what resolveReveal actually reveals", () => {
+    const known = new Set();
+    const learn = (category, rng) => {
+      for (const k of resolveReveal(facts, category, DEGREES.SUCCESS, known, true, rng).revealedKeys) known.add(k);
+    };
+    for (const category of Object.values(CATEGORIES)) learn(category, () => 0);
+    expect(isTargetExhausted(facts, known, true)).toBe(false);
+
+    learn(CATEGORIES.RESISTANCES, () => 0.999);
+    expect(isTargetExhausted(facts, known, true)).toBe(true);
   });
 });

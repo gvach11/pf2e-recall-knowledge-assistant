@@ -86,6 +86,32 @@ export function resolveReveal(facts, category, degree, revealedKeys = new Set(),
 }
 
 /**
+ * Whether a character has nothing left to learn about a target this
+ * encounter (SPEC.md §6.7): identified, and every category answered. A
+ * category is answered once a Success reported it "nothing notable", or
+ * once every fact `resolveReveal` could reveal there is known — which
+ * leaves out the identity trait, since the baseline states it instead. An
+ * empty category nobody asked about still counts as learnable: learning
+ * "it has no weaknesses" is worth an action.
+ *
+ * `revealedKeys` is any iterable of `makeFactKey` strings (the Combat flag
+ * stores an array).
+ */
+export function isTargetExhausted(facts, revealedKeys, identified) {
+  if (!identified) return false;
+  const known = new Set(revealedKeys);
+  const identityKey = makeFactKey(CATEGORIES.TRAITS, pickIdentityTrait(facts.traits));
+
+  return Object.values(CATEGORIES).every((category) => {
+    if (known.has(makeFactKey(category, NOTHING_NOTABLE_KEY))) return true;
+    const learnable = listCategoryEntries(facts, category)
+      .map((entry) => makeFactKey(category, entry.key))
+      .filter((factKey) => factKey !== identityKey);
+    return learnable.length > 0 && learnable.every((factKey) => known.has(factKey));
+  });
+}
+
+/**
  * The fact line(s) of a critical-failure lie, never contradicting what this
  * character already learned in the chosen category (SPEC.md §6.4):
  * - a Success already said "nothing notable" here → stay nothing notable;
