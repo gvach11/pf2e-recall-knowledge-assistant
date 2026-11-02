@@ -1,6 +1,6 @@
 # Live-Test Bug Fixes Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Fix the eleven defects found by driving the module live in Foundry v14 / pf2e 8.5.0 (world "third-action-test", 2026-10-29).
 
@@ -47,7 +47,7 @@ Fixes: players can't write Combat flags, so throttling, identity persistence, an
   `registerSocket(): void`; `handleSocketMessage(message, senderId): Promise<void>` (exported for tests).
 - Message shape: `{ type: "recordAttempt", combatId, actorUuid, targetUuid, degree, newRevealedKeys }`.
 
-- [ ] **Step 1: Write failing tests**
+- [x] **Step 1: Write failing tests**
 
 `tests/repeat-attempts.test.js`: change `createFakeCombat` so `setFlag(scope, path, value)` writes nested dotted paths (`"attempts.<key>"`) and `getFlag(scope, "attempts")` returns the nested object. Add:
   - `it("recording one key leaves another character's existing record untouched")`: record for `Actor.a`, then `Actor.b`, and assert both `isIdentified`/`isAttemptBlocked` results are intact.
@@ -64,16 +64,16 @@ Fixes: players can't write Combat flags, so throttling, identity persistence, an
 
 `tests/roll-sequence.test.js`: mock `../scripts/socket.js` and assert `persistAttempt` is called with `(combat, "Actor.pc1", "Actor.target1", degree, reveal.revealedKeys)` after the chat message renders.
 
-- [ ] **Step 2: Run `npx vitest run tests/socket.test.js tests/repeat-attempts.test.js tests/roll-sequence.test.js`.** Expected: FAIL (`socket.js` missing; whole-map write clobbers the other key).
+- [x] **Step 2: Run `npx vitest run tests/socket.test.js tests/repeat-attempts.test.js tests/roll-sequence.test.js`.** Expected: FAIL (`socket.js` missing; whole-map write clobbers the other key).
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
   - `recordAttempt`: read the existing record as before, then `combat.setFlag(MODULE_ID, \`${FLAG_KEY}.${key}\`, record)`. This writes one key, so concurrent relays can't overwrite each other.
   - `scripts/socket.js`: `persistAttempt` order is null combat → GM-capable → `activeGM` present → otherwise warn. `handleSocketMessage` returns early unless `game.users.activeGM?.isSelf`. It validates `type`, `degree ∈ Object.values(DEGREES)`, that keys are strings, and sender ownership. Then it calls `recordAttempt(game.combats.get(combatId), …)`. `registerSocket` calls `game.socket.on(SOCKET_NAME, handleSocketMessage)`.
   - `roll-sequence.js`: `await persistAttempt(...)` replaces `await recordAttempt(...)`.
 
-- [ ] **Step 4: Run `npm test`.** Expected: all pass.
+- [x] **Step 4: Run `npm test`.** Expected: all pass.
 
-- [ ] **Step 5: Commit** `fix(repeat-attempts): relay player attempts to the GM over a module socket`
+- [x] **Step 5: Commit** `fix(repeat-attempts): relay player attempts to the GM over a module socket`
 
 ---
 
@@ -89,11 +89,11 @@ Fixes: a combat that's only being viewed, or one that hasn't started yet, curren
 **Interfaces:**
 - Produces: `getActiveEncounter(): Combat|null`, which returns `game.combat` only when `game.combat?.started` is true.
 
-- [ ] **Step 1: Failing tests.** Stub `game.combat` as `{ started: false }` → `null`; `{ started: true }` → that object; `undefined` → `null`.
-- [ ] **Step 2: Run `npx vitest run tests/repeat-attempts.test.js`.** Expected: FAIL (not exported).
-- [ ] **Step 3: Implement** and use it at both dialog call sites.
-- [ ] **Step 4: Run `npm test`.** Expected: all pass.
-- [ ] **Step 5: Commit** `fix(repeat-attempts): only throttle inside a started encounter`
+- [x] **Step 1: Failing tests.** Stub `game.combat` as `{ started: false }` → `null`; `{ started: true }` → that object; `undefined` → `null`.
+- [x] **Step 2: Run `npx vitest run tests/repeat-attempts.test.js`.** Expected: FAIL (not exported).
+- [x] **Step 3: Implement** and use it at both dialog call sites.
+- [x] **Step 4: Run `npm test`.** Expected: all pass.
+- [x] **Step 5: Commit** `fix(repeat-attempts): only throttle inside a started encounter`
 
 ---
 
@@ -108,16 +108,16 @@ Fixes: a player who owns several PCs always rolls as `game.user.character`, even
 **Interfaces:**
 - Produces: `resolveRollingActor(): Actor|null`. It returns the actor of the first controlled token whose `actor.type === "character"` and `actor.isOwner`. Otherwise it returns `game.user.character`, otherwise `null`.
 
-- [ ] **Step 1: Failing tests** (stub `canvas.tokens.controlled` and `game.user.character`):
+- [x] **Step 1: Failing tests** (stub `canvas.tokens.controlled` and `game.user.character`):
   - controlled owned character token B while assigned character is A → B.
   - nothing controlled → A.
   - controlled NPC token (owned) → A.
   - controlled character token with `isOwner: false` → A.
   - nothing controlled and no assigned character → `null`, and `openRecallKnowledgeDialog` warns `RKA.Warning.NoRollingActor` (existing behavior kept).
-- [ ] **Step 2: Run `npx vitest run tests/scene-control.test.js`.** Expected: FAIL.
-- [ ] **Step 3: Implement** `resolveRollingActor` and use it in `openRecallKnowledgeDialog`.
-- [ ] **Step 4: Run `npm test`.** Expected: all pass.
-- [ ] **Step 5: Commit** `fix(scene-control): roll as the controlled character token when one is selected`
+- [x] **Step 2: Run `npx vitest run tests/scene-control.test.js`.** Expected: FAIL.
+- [x] **Step 3: Implement** `resolveRollingActor` and use it in `openRecallKnowledgeDialog`.
+- [x] **Step 4: Run `npm test`.** Expected: all pass.
+- [x] **Step 5: Commit** `fix(scene-control): roll as the controlled character token when one is selected`
 
 ---
 
@@ -138,15 +138,15 @@ Fixes: "Zombie Shambler is a mindless." (the alphabetically first trait), and "U
   4. else `"creature"`
 - Produces: `pickCategoryEntry(facts, category, rng, excludedKeys = new Set())` and `pickFactFromOtherCategory(facts, excludedCategories, rng, excludedKeys = new Set())`. Entries whose `makeFactKey(category, key)` is in `excludedKeys` are skipped.
 
-- [ ] **Step 1: Failing tests**
+- [x] **Step 1: Failing tests**
   - `pickIdentityTrait(["mindless","undead","unholy","zombie"])` → `"undead"`; `(["leshy","plant"])` → `"plant"`; `(["mechanical","trap"])` → `"trap"`; `(["haunt"])` → `"haunt"`; `(["foo"])` → `"foo"`; `([])` → `"creature"`.
   - reveal: facts with traits `["mindless","undead"]`, Success → `baseline.trait === "undead"`.
   - reveal: traits `["beast"]` only, Traits category, Success → `facts: []` (template renders "Nothing notable").
   - reveal: traits `["beast","fey"]`, Traits category, Success, any rng → `facts` equals `["fey"]`.
-- [ ] **Step 2: Run `npx vitest run tests/actor-data.test.js tests/reveal.test.js`.** Expected: FAIL.
-- [ ] **Step 3: Implement.** In `resolveReveal`, compute `identityTrait = pickIdentityTrait(facts.traits)`. Use it for the baseline, and pass `new Set([makeFactKey(CATEGORIES.TRAITS, identityTrait)])` as `excludedKeys` to both pickers.
-- [ ] **Step 4: Run `npm test`.** Expected: all pass.
-- [ ] **Step 5: Commit** `fix(reveal): name the creature type in the baseline and don't repeat it as a fact`
+- [x] **Step 2: Run `npx vitest run tests/actor-data.test.js tests/reveal.test.js`.** Expected: FAIL.
+- [x] **Step 3: Implement.** In `resolveReveal`, compute `identityTrait = pickIdentityTrait(facts.traits)`. Use it for the baseline, and pass `new Set([makeFactKey(CATEGORIES.TRAITS, identityTrait)])` as `excludedKeys` to both pickers.
+- [x] **Step 4: Run `npm test`.** Expected: all pass.
+- [x] **Step 5: Commit** `fix(reveal): name the creature type in the baseline and don't repeat it as a fact`
 
 ---
 
@@ -162,11 +162,11 @@ Fixes: "Resistant to physical 15" drops "(except adamantine)", and the Ghost's "
 - Produces: every IWR entry from `getActorFacts` gains `fullLabel: string`. It is pf2e's `label` when present. Otherwise it is `` `${typeLabel ?? type} ${value}` `` for weaknesses/resistances and `typeLabel ?? type` for immunities. `label` stays the bare type name and is still used by false-info.
 - `listCategoryEntries` text becomes `Weak to ${fullLabel}` / `Resistant to ${fullLabel}` / `Immune to ${fullLabel}`. There is no separate value suffix; pf2e's `label` already contains the value.
 
-- [ ] **Step 1: Failing tests.** pf2e-shaped resistance `{ type:"physical", value:15, typeLabel:"physical", label:"physical 15 (except adamantine)" }` → text `"Resistant to physical 15 (except adamantine)"`. Weakness without `label` → `"Weak to silver 5"`. Immunity `{ type:"magic", typeLabel:"magic", label:"magic (except wisp vulnerabilities)" }` → `"Immune to magic (except wisp vulnerabilities)"`. Update the existing commit-64dd19b regression test so it asserts that no value appears twice.
-- [ ] **Step 2: Run `npx vitest run tests/actor-data.test.js`.** Expected: FAIL.
-- [ ] **Step 3: Implement.**
-- [ ] **Step 4: Run `npm test`.** Expected: all pass. (Reveal tests that build facts by hand need `fullLabel` added to their fixtures.)
-- [ ] **Step 5: Commit** `fix(actor-data): keep IWR exceptions in reveal text`
+- [x] **Step 1: Failing tests.** pf2e-shaped resistance `{ type:"physical", value:15, typeLabel:"physical", label:"physical 15 (except adamantine)" }` → text `"Resistant to physical 15 (except adamantine)"`. Weakness without `label` → `"Weak to silver 5"`. Immunity `{ type:"magic", typeLabel:"magic", label:"magic (except wisp vulnerabilities)" }` → `"Immune to magic (except wisp vulnerabilities)"`. Update the existing commit-64dd19b regression test so it asserts that no value appears twice.
+- [x] **Step 2: Run `npx vitest run tests/actor-data.test.js`.** Expected: FAIL.
+- [x] **Step 3: Implement.**
+- [x] **Step 4: Run `npm test`.** Expected: all pass. (Reveal tests that build facts by hand need `fullLabel` added to their fixtures.)
+- [x] **Step 5: Commit** `fix(actor-data): keep IWR exceptions in reveal text`
 
 ---
 
@@ -183,14 +183,14 @@ Fixes: lies like "Weak to unconscious 5", "Weak to doomed 5" and "Weak to object
 - Produces: resistance and immunity entries gain `invertible: boolean`, which is `type in CONFIG.PF2E.weaknessTypes`. Weakness entries gain `invertible: boolean`, which is `type in CONFIG.PF2E.resistanceTypes`. When `CONFIG.PF2E` is absent, read it as `{}` (nothing invertible).
 - `listCategoryEntries` passes `invertible` through. `invertToFalseWeakness`/`invertToFalseResistance` keep only entries with `invertible === true`.
 
-- [ ] **Step 1: Failing tests.**
+- [x] **Step 1: Failing tests.**
   - actor-data: stub `CONFIG.PF2E.weaknessTypes = { fire:"", poison:"" }`. Immunities `fire`, `unconscious` → `invertible` is `true` and `false` respectively.
   - false-info: immunities `[{type:"unconscious", invertible:false}, {type:"poison", invertible:true}]` → over 25 rng values the text is always `"Weak to poison 5"`. With only non-invertible entries → `null`.
   - Add `invertible: true` to the existing `richFacts` fixtures.
-- [ ] **Step 2: Run `npx vitest run tests/actor-data.test.js tests/false-info.test.js`.** Expected: FAIL.
-- [ ] **Step 3: Implement.**
-- [ ] **Step 4: Run `npm test`.** Expected: all pass.
-- [ ] **Step 5: Commit** `fix(false-info): only invert into weakness/resistance types pf2e recognizes`
+- [x] **Step 2: Run `npx vitest run tests/actor-data.test.js tests/false-info.test.js`.** Expected: FAIL.
+- [x] **Step 3: Implement.**
+- [x] **Step 4: Run `npm test`.** Expected: all pass.
+- [x] **Step 5: Commit** `fix(false-info): only invert into weakness/resistance types pf2e recognizes`
 
 ---
 
@@ -208,17 +208,17 @@ Fixes: lies have no baseline sentence and can answer a different category than t
 - Produces: `generateFalseInfo(facts, category, revealedKeys, rng)`. It returns a lie for that category only, or `null`. Its signature is unchanged.
 - `resolveReveal` for an identified critical failure returns `{ baseline: { name, trait: pickIdentityTrait(traits) }, facts: lie ? [lie.text] : [], revealedKeys: [] }`. The unidentified critical failure is unchanged (no baseline, no facts).
 
-- [ ] **Step 1: Failing tests.** Replace the "baseline is null" assertion in the existing identified-critical-failure test.
+- [x] **Step 1: Failing tests.** Replace the "baseline is null" assertion in the existing identified-critical-failure test.
   - Identified critical failure → `baseline` equals the Success baseline for the same facts.
   - Weaknesses category on facts with no invertible resistances/immunities → `facts: []` with baseline present.
   - `generateFalseInfo(facts, WEAKNESSES, …)` → never a trait or a resistance, over 25 rng values.
   - Delete the false-info tests asserting the cross-category fallback and the empty-data false-trait fallback.
-- [ ] **Step 2: Run `npx vitest run tests/false-info.test.js tests/reveal.test.js`.** Expected: FAIL.
-- [ ] **Step 3: Implement**, and update `SPEC.md`.
+- [x] **Step 2: Run `npx vitest run tests/false-info.test.js tests/reveal.test.js`.** Expected: FAIL.
+- [x] **Step 3: Implement**, and update `SPEC.md`.
   - §6.3 Critical Failure (identified): "same baseline sentence as a Success, plus one false fact in the chosen category; if no safe false fact exists there, 'Nothing notable in that regard'".
   - §6.4: replace the "fall back through the other categories" sentence and the "Empty-data fallback" bullet with that rule.
-- [ ] **Step 4: Run `npm test`.** Expected: all pass.
-- [ ] **Step 5: Commit** `fix(reveal): make a critical-failure lie read exactly like a success`
+- [x] **Step 4: Run `npm test`.** Expected: all pass.
+- [x] **Step 5: Commit** `fix(reveal): make a critical-failure lie read exactly like a success`
 
 ---
 
@@ -256,15 +256,15 @@ Fixes:
   - `RKA.Dialog.NoSkills`: `"None of your skills seem relevant to this."`
 - Dialog context: `targetImg` comes from `targetToken.document.texture.src`, which is what the player already sees on the canvas. A `noSkills` flag drives a `<p class="rka-no-skills">` in the template in place of the empty skill list.
 
-- [ ] **Step 1: Failing tests.**
+- [x] **Step 1: Failing tests.**
   - `getRelevantSkills({ type:"hazard" }, { traits:["mechanical","trap"] })` → `["crafting"]`; `(["magical","trap","divine"])` → `["religion"]` (a tradition trait overrides the generic `magical` entry); `(["magical","trap"])` → `["arcana","nature","occultism","religion"]`; `(["trap"])` → `[]`; `(["environmental"])` → `["nature"]`.
   - `(["haunt"])` → `["occultism","religion"]`.
   - `pickFalseTrait({ kind:"hazard", traits:["trap","mechanical"] })` → always a key of `HAZARD_TRAIT_SKILLS`, never `"trap"` or `"mechanical"`.
   - `getUnknownTargetLabelKey({ type:"hazard" })` → `"RKA.UnknownHazard"`; for an `npc` → `"RKA.UnknownTarget"`.
-- [ ] **Step 2: Run `npx vitest run tests/actor-data.test.js tests/false-info.test.js tests/targeting.test.js`.** Expected: FAIL.
-- [ ] **Step 3: Implement**, including the dialog/template/lang changes. The chat header for unidentified hazards uses the same key via `getUnknownTargetLabelKey` in `render-result.js`.
-- [ ] **Step 4: Run `npm test`.** Expected: all pass.
-- [ ] **Step 5: Commit** `fix(hazards): give hazards relevant skills and a hazard-appropriate header`
+- [x] **Step 2: Run `npx vitest run tests/actor-data.test.js tests/false-info.test.js tests/targeting.test.js`.** Expected: FAIL.
+- [x] **Step 3: Implement**, including the dialog/template/lang changes. The chat header for unidentified hazards uses the same key via `getUnknownTargetLabelKey` in `render-result.js`.
+- [x] **Step 4: Run `npm test`.** Expected: all pass.
+- [x] **Step 5: Commit** `fix(hazards): give hazards relevant skills and a hazard-appropriate header`
 
 ---
 
@@ -279,11 +279,11 @@ Fixes: closing pf2e's Check Modifiers dialog shows a red "roll couldn't be compl
 **Interfaces:**
 - When `rollRecallKnowledge` resolves `null`, `executeRollSequence` returns `{ outcome: "cancelled" }`. It logs with `console.debug`, shows no toast, renders nothing, and records nothing. A thrown error still returns `"error"` with the toast.
 
-- [ ] **Step 1: Failing test.** Replace the F6 "no-roll" test: a `null` roll → `{ outcome: "cancelled" }`, `ui.notifications.error` not called, `persistAttempt` not called.
-- [ ] **Step 2: Run `npx vitest run tests/roll-sequence.test.js`.** Expected: FAIL.
-- [ ] **Step 3: Implement.**
-- [ ] **Step 4: Run `npm test`.** Expected: all pass.
-- [ ] **Step 5: Commit** `fix(roll-sequence): treat a cancelled pf2e roll dialog as a cancel, not an error`
+- [x] **Step 1: Failing test.** Replace the F6 "no-roll" test: a `null` roll → `{ outcome: "cancelled" }`, `ui.notifications.error` not called, `persistAttempt` not called.
+- [x] **Step 2: Run `npx vitest run tests/roll-sequence.test.js`.** Expected: FAIL.
+- [x] **Step 3: Implement.**
+- [x] **Step 4: Run `npm test`.** Expected: all pass.
+- [x] **Step 5: Commit** `fix(roll-sequence): treat a cancelled pf2e roll dialog as a cancel, not an error`
 
 ---
 
@@ -291,9 +291,9 @@ Fixes: closing pf2e's Check Modifiers dialog shows a red "roll couldn't be compl
 
 **Files:** none (the scratchpad driver from the test session).
 
-- [ ] **Step 1:** `npm test`. Expected: all pass.
-- [ ] **Step 2:** Return to Setup and relaunch "third-action-test". `module.json`'s new `"socket": true` is only read at world launch. Ask the user before doing this, because it disconnects their open client.
-- [ ] **Step 3:** Using the GM and "RKA Player" sessions on "RKA Test Scene", with a fresh *started* encounter viewed on both clients:
+- [x] **Step 1:** `npm test`. Expected: all pass.
+- [x] **Step 2:** Return to Setup and relaunch "third-action-test". `module.json`'s new `"socket": true` is only read at world launch. Ask the user before doing this, because it disconnects their open client.
+- [x] **Step 3:** Using the GM and "RKA Player" sessions on "RKA Test Scene", with a fresh *started* encounter viewed on both clients:
   - Player rolls a failure on the Werewolf. Expected: no error toast; the GM's combat flag has the record; reopening the dialog shows the blocked message.
   - Player identifies the Zombie, then rolls a critical failure on Weaknesses. Expected: the header shows the name, the baseline reads "Zombie Shambler is an undead.", and the fact is "Weak to …" or "Nothing notable".
   - Player selects the Bard token and rolls. Expected: the speaker is "RKA Test Bard".
@@ -301,4 +301,4 @@ Fixes: closing pf2e's Check Modifiers dialog shows a red "roll couldn't be compl
   - Iron Golem Resistances Success, rolled until the physical entry appears. Expected: it includes "(except adamantine)".
   - Cancel pf2e's dialog. Expected: no toast.
   - The GM-only message stays "???" for the player.
-- [ ] **Step 4:** Confirm the sender id arrives as the socket handler's second argument. If it doesn't in v14, put `userId` in the payload and check it against the actor's ownership. Patch, then rerun Task 1's tests.
+- [x] **Step 4:** Confirm the sender id arrives as the socket handler's second argument. If it doesn't in v14, put `userId` in the payload and check it against the actor's ownership. Patch, then rerun Task 1's tests.
