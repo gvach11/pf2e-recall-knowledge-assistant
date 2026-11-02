@@ -19,13 +19,27 @@ export function getValidatedSingleTarget() {
     return null;
   }
 
-  const token = targets.first();
-  const actorType = token.actor?.type;
-  if (!VALID_ACTOR_TYPES.has(actorType)) {
+  return validateTargetToken(targets.first());
+}
+
+/**
+ * Whether an actor can be the subject of Recall Knowledge: an NPC or
+ * Hazard, never a PC or any other actor type.
+ */
+export function isValidTargetActor(actor) {
+  return VALID_ACTOR_TYPES.has(actor?.type);
+}
+
+/**
+ * Checks one specific token as a Recall Knowledge target. Returns the
+ * token, or null (after showing a warning notification) if it isn't an
+ * NPC or Hazard.
+ */
+export function validateTargetToken(token) {
+  if (!isValidTargetActor(token?.actor)) {
     ui.notifications.warn(game.i18n.localize("RKA.Warning.InvalidTargetType"));
     return null;
   }
-
   return token;
 }
 

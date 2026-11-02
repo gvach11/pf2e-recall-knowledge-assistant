@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { getUnknownTargetLabelKey, getValidatedSingleTarget } from "../scripts/targeting.js";
+import { getUnknownTargetLabelKey, getValidatedSingleTarget, validateTargetToken } from "../scripts/targeting.js";
 
 function fakeTargets(tokens) {
   return {
@@ -76,5 +76,40 @@ describe("getUnknownTargetLabelKey", () => {
 
   it("calls an unidentified NPC an unknown creature", () => {
     expect(getUnknownTargetLabelKey({ type: "npc" })).toBe("RKA.UnknownTarget");
+  });
+});
+
+describe("validateTargetToken", () => {
+  let warnSpy;
+
+  beforeEach(() => {
+    warnSpy = vi.fn();
+    vi.stubGlobal("ui", { notifications: { warn: warnSpy } });
+    vi.stubGlobal("game", { i18n: { localize: (key) => key } });
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("accepts an NPC token without warning", () => {
+    const token = { actor: { type: "npc" } };
+    expect(validateTargetToken(token)).toBe(token);
+    expect(warnSpy).not.toHaveBeenCalled();
+  });
+
+  it("accepts a hazard token", () => {
+    const token = { actor: { type: "hazard" } };
+    expect(validateTargetToken(token)).toBe(token);
+  });
+
+  it("rejects a character token with the invalid-type warning", () => {
+    expect(validateTargetToken({ actor: { type: "character" } })).toBeNull();
+    expect(warnSpy).toHaveBeenCalledWith("RKA.Warning.InvalidTargetType");
+  });
+
+  it("rejects a token whose actor is gone with the same warning", () => {
+    expect(validateTargetToken({ actor: null })).toBeNull();
+    expect(warnSpy).toHaveBeenCalledWith("RKA.Warning.InvalidTargetType");
   });
 });
