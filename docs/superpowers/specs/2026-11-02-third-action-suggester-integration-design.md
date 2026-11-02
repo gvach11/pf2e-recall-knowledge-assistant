@@ -79,7 +79,8 @@ Each module must still work perfectly on its own.
    usage, settings, AI disclosure — same structure as TAS's), CHANGELOG;
    fill `module.json` `url`/`manifest`/`download` and make `authors` match
    TAS (`Vachna`, `https://github.com/gvach11`); `manifest` points at
-   `https://github.com/gvach11/pf2e-recall-knowledge-assistant/releases/latest/download/module.json`;
+   `https://raw.githubusercontent.com/gvach11/pf2e-recall-knowledge-assistant/master/module.json`
+   (changed in final review: `releases/latest` skips pre-releases);
    stop tracking `.claude/settings.local.json` and gitignore it; a packaging
    script that zips only `module.json`, `scripts/`, `templates/`, `styles/`,
    `lang/`, `README.md`, `LICENSE`, `CHANGELOG.md`. Publish a GitHub

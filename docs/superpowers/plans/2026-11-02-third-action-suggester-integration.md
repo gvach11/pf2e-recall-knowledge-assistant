@@ -49,7 +49,7 @@
 - [ ] **Step 5: module.json.**
   - `authors`: `[{ "name": "Vachna", "url": "https://github.com/gvach11" }]`
   - `url`: `https://github.com/gvach11/pf2e-recall-knowledge-assistant`
-  - `manifest`: `https://github.com/gvach11/pf2e-recall-knowledge-assistant/releases/latest/download/module.json`
+  - `manifest`: `https://raw.githubusercontent.com/gvach11/pf2e-recall-knowledge-assistant/master/module.json` (final review: GitHub's `releases/latest` skips pre-releases, so it would 404)
   - `download`: `https://github.com/gvach11/pf2e-recall-knowledge-assistant/releases/download/v0.1.0/pf2e-recall-knowledge-assistant.zip`
 - [ ] **Step 6: Untrack local settings.** `git rm --cached .claude/settings.local.json`. Add `.claude/settings.local.json` and `dist/` to `.gitignore`.
 - [ ] **Step 7: `tools/package.mjs`** (run as `npm run package`). It recreates `dist/`, copies `module.json` to `dist/module.json`, and builds `dist/pf2e-recall-knowledge-assistant.zip` holding exactly `module.json`, `scripts/`, `templates/`, `styles/`, `lang/`, `README.md`, `LICENSE`, `CHANGELOG.md` at the zip root (no wrapping folder; same layout as TAS's v1.0.0 zip). Use `%SystemRoot%\System32\tar.exe -a -c -f` on Windows (bsdtar, writes zip from the extension); Git Bash's GNU tar can't write zip.
@@ -64,7 +64,7 @@
 - [ ] **Step 2:** If anything fails, stop and debug (superpowers:systematic-debugging) before going on.
 - [ ] **Step 3:** Tick every completed box in `2026-10-29-live-test-bug-fixes.md`; commit `docs(plan): mark live-test bug fixes verified`.
 - [ ] **Step 4 (ask first):** Merge `release/v0.1.0` into `master` (fast-forward), push, tag `v0.1.0`, push the tag.
-- [ ] **Step 5 (ask first):** `npm run package`, then `gh release create v0.1.0 dist/pf2e-recall-knowledge-assistant.zip dist/module.json --prerelease --title "v0.1.0" --notes-file -` with the CHANGELOG 0.1.0 section as notes.
+- [ ] **Step 5 (ask first):** From the `release/v0.1.0` checkout (not `feat/tas-integration`, which is at 0.2.0): `npm run package`, then `gh release create v0.1.0 dist/pf2e-recall-knowledge-assistant.zip dist/module.json --prerelease --title "v0.1.0" --notes-file -` with the CHANGELOG 0.1.0 section as notes.
 - [ ] **Step 6: Verify.** `gh release view v0.1.0` lists both assets. The manifest URL from Task 1 Step 5 downloads a `module.json` with `"version": "0.1.0"`.
 
 ### Task 3: RKA "nothing left to learn" check
@@ -215,8 +215,8 @@ Repo: TAS, branch `feat/rka-integration`.
 ### Task 9: Live verification and publish (user-gated)
 
 - [ ] **Step 1 (ask first):** Install both working copies into the v14 test world (`third-action-test`) and relaunch it.
-- [ ] **Step 2:** With the user, run the design doc's §7 checklist on GM + player clients with a started encounter. Every line passes, or stop and debug (superpowers:systematic-debugging) before going on.
+- [ ] **Step 2:** With the user, run the design doc's §7 checklist, plus the final review's two notes (after a Critical Failure lie on an identified, not-yet-exhausted enemy, check the suggestion's behaviour matches the user's decision on finding #1; after reloading mid-turn, note whether the Recall Knowledge button shows the info icon though it opens RKA), on GM + player clients with a started encounter. Every line passes, or stop and debug (superpowers:systematic-debugging) before going on.
 - [ ] **Step 3:** TAS `module.json` `compatibility.verified` → `"14"`; commit `chore: verify on Foundry v14`.
-- [ ] **Step 4 (ask first):** Merge RKA `feat/tas-integration` → `master` and TAS `feat/rka-integration` → `main`; push; tag `v0.2.0` (RKA) and `v1.1.0` (TAS); push the tags.
-- [ ] **Step 5 (ask first):** `npm run package` in each repo; `gh release create` for each with its zip and `dist/module.json`. RKA's is marked `--prerelease`; whether TAS 1.1.0 is a full release is the user's call. Use each CHANGELOG section as the notes.
-- [ ] **Step 6: Verify.** `gh release view` in each repo lists both assets. RKA's manifest URL serves `0.2.0`; TAS's manifest (raw `main` `module.json`) serves `1.1.0`.
+- [ ] **Step 4 (ask first):** In each repo, from the feature branch: `npm run package`, tag `v0.2.0` (RKA) / `v1.1.0` (TAS) on the branch tip, push the branch and the tag, and `gh release create` with the zip and `dist/module.json` attached. Both manifests are raw `master`/`main` `module.json`, so the release asset must exist before Step 5 advertises the new version.
+- [ ] **Step 5 (ask first):** Merge RKA `feat/tas-integration` → `master` and TAS `feat/rka-integration` → `main` (fast-forward) and push. (In Step 4, RKA's release is marked `--prerelease`; whether TAS 1.1.0 is a full release is the user's call. Use each CHANGELOG section as the notes.)
+- [ ] **Step 6: Verify.** `gh release view` in each repo lists both assets. RKA's manifest (raw `master` `module.json`) serves `0.2.0`; TAS's (raw `main`) serves `1.1.0`.
