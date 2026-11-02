@@ -349,6 +349,14 @@ Success never does. A caller that hides Recall Knowledge for `"blocked"`
 targets therefore lets a player infer that a Success-looking result was a
 lie, as reopening the dialog already does. Kept deliberately to follow RAW.
 
+**Known limitations (accepted):**
+- *Several started combats.* Records live in, and are read from, the combat
+  the user's tracker shows (`game.combat`), which may not be the combat whose
+  turn just changed. One encounter at a time is normal play.
+- *Unlinked PC tokens.* Records are keyed by the rolling actor's uuid; an
+  unlinked PC token has its own actor, so it and the assigned character keep
+  separate records. Unlinked PC tokens are a pf2e setup mistake.
+
 ## 7. Open Questions
 
 None outstanding — all resolved into §4 Key Decisions.

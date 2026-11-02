@@ -183,6 +183,8 @@ Repo: TAS, branch `feat/rka-integration`.
 - [ ] **Step 5:** `npm test`. Expected: all pass.
 - [ ] **Step 6: Commit** `feat(rka): detect Recall Knowledge Assistant and ask it which enemies are worth recalling` (include `package.json`, `package-lock.json`, `.gitignore`, both new files).
 
+**Pushback addendum (2026-11-02), done:** `hasWorthwhileRecallTarget` only asks about tokens with `visible === true` (RKA path only). Tests: "ignores enemies this user can't see, so a hidden one can't keep the suggestion alive", "still counts a visible available enemy next to a hidden one". TAS commits `af8c0e7`, `a30212b`.
+
 ### Task 7: TAS wiring
 
 **Files:**

@@ -204,9 +204,11 @@ shape (names are the builder's call):
 - `canRouteToRka(actor)` — `getRkaApi()` is non-null and `actor.type ===
   "character"`.
 - `hasWorthwhileRecallTarget(actor, nearbyEnemyTokens)` — if
-  `canRouteToRka(actor)`: true when some token's
-  `getAttemptStatus({ actor, targetToken })` is `"available"`. Otherwise:
-  `nearbyEnemyTokens.length > 0` (today's behaviour).
+  `canRouteToRka(actor)`: true when some token **this user can see**
+  (`token.visible`; a GM sees hidden tokens) has
+  `getAttemptStatus({ actor, targetToken })` `"available"`. A hidden enemy
+  must never keep the suggestion showing (pushback 2026-11-02). Otherwise:
+  `nearbyEnemyTokens.length > 0` (today's behaviour, unfiltered).
 - `openRecallKnowledge(actor)` — calls `api.openDialog({ actor })`. Does not
   pass a target: the user's current Foundry target is used, and RKA shows its
   own warnings if there's none, several, or the wrong kind.
@@ -272,6 +274,8 @@ With a started encounter, a GM client and a player client:
   suggested whenever an enemy is within 30 ft).
 - Hotbar macro and scene-control button still open RKA as before.
 - Player's panel and chat show no enemy names or DCs.
+- A GM-hidden enemy within 30 ft never keeps Recall Knowledge suggested on a
+  player's turn once every visible enemy is blocked or exhausted.
 
 ## 8. Calls made by the designer (not by the user)
 
@@ -293,6 +297,20 @@ failed, further attempts are fruitless"; SPEC §4/§6.6). A Success never
 blocks, so the suggestion disappearing after a Success-looking result tells
 the player it was a lie. This is accepted as the cost of following RAW. RKA's
 own dialog already shows the same thing ("already attempted") on reopening.
+
+**Decided by the user in pushback (2026-11-02):**
+- Only enemies the user can see count toward the suggestion (§6.1), and only
+  on the Recall Knowledge Assistant path; the fallback keeps 1.0.0 behaviour.
+- **Known limitation — several started combats:** RKA records attempts in the
+  combat the user's tracker shows (`game.combat`), and `getAttemptStatus`
+  reads the same one, not necessarily the combat whose turn just changed.
+  With two encounters running at once, TAS can read the wrong encounter's
+  records. Accepted: one encounter at a time is normal play.
+- **Known limitation — unlinked PC tokens:** RKA keys records by the rolling
+  actor's uuid. An unlinked PC token has its own actor, so TAS (combatant's
+  actor) and the scene button (assigned character when nothing is
+  controlled) can keep separate records for the same character. Accepted:
+  unlinked PC tokens are a setup mistake in pf2e.
 
 ## 9. Left to the builder
 
