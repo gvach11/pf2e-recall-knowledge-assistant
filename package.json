@@ -1,6 +1,6 @@
 {
   "name": "pf2e-recall-knowledge-assistant",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "private": true,
   "description": "Test tooling for the Recall Knowledge Assistant FoundryVTT module. Not part of the module runtime.",
   "type": "module",

@@ -2,7 +2,7 @@
   "id": "pf2e-recall-knowledge-assistant",
   "title": "PF2e Recall Knowledge Assistant",
   "description": "Streamlines PF2e's Recall Knowledge action: target an enemy, pick a category, roll, and get a scoped reveal with the DC always hidden.",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "authors": [
     {
       "name": "Vachna",
@@ -41,6 +41,6 @@
   ],
   "url": "https://github.com/gvach11/pf2e-recall-knowledge-assistant",
   "manifest": "https://raw.githubusercontent.com/gvach11/pf2e-recall-knowledge-assistant/master/module.json",
-  "download": "https://github.com/gvach11/pf2e-recall-knowledge-assistant/releases/download/v0.2.0/pf2e-recall-knowledge-assistant.zip",
+  "download": "https://github.com/gvach11/pf2e-recall-knowledge-assistant/releases/download/v1.0.0/pf2e-recall-knowledge-assistant.zip",
   "license": "LICENSE"
 }

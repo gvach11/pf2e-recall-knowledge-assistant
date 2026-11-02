@@ -4,7 +4,7 @@ A [Foundry VTT](https://foundryvtt.com) module for the [Pathfinder Second Editio
 
 Recall Knowledge in one click: target an enemy, pick what you're trying to remember, roll, and get a result scoped to what your character actually learned. The DC is never shown to players.
 
-> **Preliminary release.** Version 0.x is feature-complete for its scope but still being play-tested. Please report anything odd on the [issue tracker](https://github.com/gvach11/pf2e-recall-knowledge-assistant/issues).
+Found something odd? Please report it on the [issue tracker](https://github.com/gvach11/pf2e-recall-knowledge-assistant/issues).
 
 ---
 
@@ -60,7 +60,7 @@ Once the world is ready, the module publishes an API at `game.modules.get("pf2e-
 | Member | What it does |
 |---|---|
 | `apiVersion` | `1`. Check `api.apiVersion >= 1` before using the members below. |
-| `openDialog({ actor, targetToken } = {})` | Opens the dialog. With no arguments it uses the user's single current target and their controlled or assigned character. `actor` must be a character the user owns; `targetToken` must be an NPC or hazard token. |
+| `openDialog({ actor, targetToken } = {})` | Opens the dialog. With no arguments it uses the user's single current target and their controlled or assigned character. `actor` must be a character the user owns; `targetToken` must be an NPC or hazard token on the current scene (a Token or its TokenDocument). |
 | `getAttemptStatus({ actor, targetToken })` | Read-only. `"available"`, `"blocked"` (failed against it this encounter), `"exhausted"` (nothing left to learn), or `"invalid"` (not a character rolling against an NPC or hazard). |
 
 ---

@@ -4,11 +4,13 @@ All notable changes to **PF2e Recall Knowledge Assistant** are documented here.
 
 ---
 
-## [0.2.0] — 2026-11-02
+## [1.0.0] — 2026-11-02
+
+First stable release.
 
 ### Public API
 - `game.modules.get("pf2e-recall-knowledge-assistant").api` now has `apiVersion` (1) and `getAttemptStatus({ actor, targetToken })`
-- `openDialog({ actor, targetToken })` can name the rolling character and the target; with no arguments it behaves as before
+- `openDialog({ actor, targetToken })` can name the rolling character and the target (a Token or TokenDocument); with no arguments it behaves as before
 
 ### Integrations
 - Works with PF2E Third Action Suggester 1.1.0: its Recall Knowledge suggestion opens this dialog and hides when there's nothing left to learn
