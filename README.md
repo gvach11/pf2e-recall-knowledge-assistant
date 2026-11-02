@@ -28,7 +28,7 @@ Recall Knowledge in one click: target an enemy, pick what you're trying to remem
 
 Paste the manifest URL into Foundry's *Install Module* dialog:
 ```
-https://github.com/gvach11/pf2e-recall-knowledge-assistant/releases/latest/download/module.json
+https://raw.githubusercontent.com/gvach11/pf2e-recall-knowledge-assistant/master/module.json
 ```
 
 ---
