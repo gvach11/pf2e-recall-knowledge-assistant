@@ -40,7 +40,7 @@
     }
   ],
   "url": "https://github.com/gvach11/pf2e-recall-knowledge-assistant",
-  "manifest": "https://github.com/gvach11/pf2e-recall-knowledge-assistant/releases/latest/download/module.json",
+  "manifest": "https://raw.githubusercontent.com/gvach11/pf2e-recall-knowledge-assistant/master/module.json",
   "download": "https://github.com/gvach11/pf2e-recall-knowledge-assistant/releases/download/v0.1.0/pf2e-recall-knowledge-assistant.zip",
   "license": "LICENSE"
 }
