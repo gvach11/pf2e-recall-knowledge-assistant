@@ -34,9 +34,9 @@ describe("getAttemptStatus", () => {
   let targetToken;
 
   beforeEach(() => {
-    combat = Object.assign(createFakeCombat(), { started: true });
     targetToken = { actor: ghoul() };
-    vi.stubGlobal("game", { combat });
+    combat = createFakeCombat({ actorUuids: [targetToken.actor.uuid] });
+    vi.stubGlobal("game", { combat, combats: [combat] });
   });
 
   afterEach(() => {
@@ -59,13 +59,18 @@ describe("getAttemptStatus", () => {
     expect(getAttemptStatus({ actor: pc, targetToken: { actor: { uuid: "Actor.pc2", type: "character" } } })).toBe("invalid");
   });
 
-  it("available outside a started encounter", async () => {
+  it("available when the target's encounter hasn't started", async () => {
     await recordAttempt(combat, pc.uuid, targetToken.actor.uuid, "failure");
-
-    game.combat = undefined;
+    combat.started = false;
     expect(getAttemptStatus({ actor: pc, targetToken })).toBe("available");
+  });
 
-    game.combat = Object.assign(createFakeCombat(), { started: false });
+  it("available when the tracker shows an old encounter the target isn't in", async () => {
+    // The reported bug: a forgotten started encounter with another cast,
+    // shown in the tracker, held a failure against this target.
+    const oldFight = createFakeCombat({ id: "old", actorUuids: ["Actor.wolf"] });
+    await recordAttempt(oldFight, pc.uuid, targetToken.actor.uuid, "failure");
+    vi.stubGlobal("game", { combat: oldFight, combats: [oldFight] });
     expect(getAttemptStatus({ actor: pc, targetToken })).toBe("available");
   });
 
@@ -93,6 +98,7 @@ describe("getAttemptStatus", () => {
   it("each unlinked token is its own target", async () => {
     const tokenA = { actor: ghoul("Scene.s.Token.a.Actor.x") };
     const tokenB = { actor: ghoul("Scene.s.Token.b.Actor.x") };
+    combat.combatants.push({ actor: tokenA.actor }, { actor: tokenB.actor });
     await recordAttempt(combat, pc.uuid, tokenA.actor.uuid, "failure");
 
     expect(getAttemptStatus({ actor: pc, targetToken: tokenA })).toBe("blocked");

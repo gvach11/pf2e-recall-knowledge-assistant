@@ -7,7 +7,7 @@ import {
   recordAttempt,
   isIdentified,
   getRevealedFacts,
-  getActiveEncounter,
+  getEncounterFor,
 } from "../scripts/repeat-attempts.js";
 import { DEGREES } from "../scripts/constants.js";
 
@@ -143,24 +143,50 @@ describe("getRevealedFacts / recordAttempt revealed-key tracking", () => {
   });
 });
 
-describe("getActiveEncounter", () => {
+describe("getEncounterFor", () => {
+  const skeleton = { uuid: "Scene.s1.Token.t1.Actor.skel" };
+  const fight = (id, actorUuids, options = {}) => createFakeCombat({ id, actorUuids, ...options });
+
   afterEach(() => {
     vi.unstubAllGlobals();
   });
 
-  it("ignores a combat that exists but hasn't started", () => {
-    vi.stubGlobal("game", { combat: { started: false } });
-    expect(getActiveEncounter()).toBeNull();
+  it("is null without a target actor", () => {
+    vi.stubGlobal("game", { combat: null, combats: [fight("c1", [skeleton.uuid])] });
+    expect(getEncounterFor(null)).toBeNull();
   });
 
-  it("returns the viewed combat once it has started", () => {
-    const combat = { started: true };
-    vi.stubGlobal("game", { combat });
-    expect(getActiveEncounter()).toBe(combat);
+  it("ignores a combat that hasn't started", () => {
+    const setup = fight("c1", [skeleton.uuid], { started: false });
+    vi.stubGlobal("game", { combat: setup, combats: [setup] });
+    expect(getEncounterFor(skeleton)).toBeNull();
   });
 
-  it("is null with no combat at all", () => {
-    vi.stubGlobal("game", { combat: undefined });
-    expect(getActiveEncounter()).toBeNull();
+  it("ignores a started combat the target isn't in", () => {
+    const oldFight = fight("old", ["Actor.wolf"]);
+    vi.stubGlobal("game", { combat: oldFight, combats: [oldFight] });
+    expect(getEncounterFor(skeleton)).toBeNull();
+  });
+
+  it("finds the started combat the target is in, whatever the tracker shows", () => {
+    const oldFight = fight("old", ["Actor.wolf"]);
+    const current = fight("new", [skeleton.uuid]);
+    vi.stubGlobal("game", { combat: oldFight, combats: [oldFight, current] });
+    expect(getEncounterFor(skeleton)).toBe(current);
+  });
+
+  it("prefers the tracker's combat when several contain the target", () => {
+    const first = fight("a", [skeleton.uuid]);
+    const second = fight("b", [skeleton.uuid]);
+    vi.stubGlobal("game", { combat: second, combats: [first, second] });
+    expect(getEncounterFor(skeleton)).toBe(second);
+  });
+
+  it("otherwise takes the first combat that contains the target", () => {
+    const first = fight("a", [skeleton.uuid]);
+    const second = fight("b", [skeleton.uuid]);
+    const unrelated = fight("c", ["Actor.wolf"]);
+    vi.stubGlobal("game", { combat: unrelated, combats: [unrelated, first, second] });
+    expect(getEncounterFor(skeleton)).toBe(first);
   });
 });

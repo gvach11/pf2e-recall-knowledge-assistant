@@ -22,14 +22,20 @@ export function shouldBlockAfter(degree) {
 }
 
 /**
- * The encounter attempts are tracked against, or null outside one.
- * `game.combat` is whichever combat the tracker is showing, which may be
- * one still being set up; only a started combat counts as an active
- * encounter (SPEC.md §6.6), so preparing a fight never throttles anyone.
+ * The encounter attempts against this target are tracked on, or null
+ * outside one: the started combat the target is a combatant in (SPEC.md
+ * §6.6 "Which encounter"). `game.combat` alone can't be trusted — it's
+ * whichever combat the user's tracker shows, which may be an old encounter
+ * left running with a different cast. Only a started combat counts, so
+ * preparing a fight never throttles anyone. Matched by actor uuid, the
+ * same key attempts are recorded under.
  */
-export function getActiveEncounter() {
-  const combat = game.combat;
-  return combat?.started ? combat : null;
+export function getEncounterFor(targetActor) {
+  if (!targetActor) return null;
+  const candidates = (game.combats?.filter((combat) => combat.started) ?? []).filter((combat) =>
+    combat.combatants.some((combatant) => combatant.actor?.uuid === targetActor.uuid)
+  );
+  return candidates.includes(game.combat) ? game.combat : (candidates[0] ?? null);
 }
 
 function getRecord(combat, actorUuid, targetUuid) {

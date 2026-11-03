@@ -1,7 +1,7 @@
 import { CATEGORIES, MODULE_ID } from "../constants.js";
 import { getActorFacts, getRelevantSkills } from "../actor-data.js";
 import { computeHiddenDC, computeLikelihood } from "../data/dc-table.js";
-import { getActiveEncounter, isAttemptBlocked } from "../repeat-attempts.js";
+import { getEncounterFor, isAttemptBlocked } from "../repeat-attempts.js";
 import { executeRollSequence } from "../roll-sequence.js";
 import { getUnknownTargetLabelKey } from "../targeting.js";
 
@@ -48,7 +48,7 @@ export class RecallKnowledgeDialog extends HandlebarsApplicationMixin(Applicatio
   };
 
   async _prepareContext() {
-    const combat = getActiveEncounter();
+    const combat = getEncounterFor(this.#targetActor);
     const blocked = isAttemptBlocked(combat, this.#rollingActor.uuid, this.#targetActor.uuid);
 
     const dc = this.#dc;
@@ -102,7 +102,7 @@ export class RecallKnowledgeDialog extends HandlebarsApplicationMixin(Applicatio
     this.#isRolling = true;
     try {
       const result = await executeRollSequence({
-        combat: getActiveEncounter(),
+        combat: getEncounterFor(this.#targetActor),
         rollingActor: this.#rollingActor,
         targetActor: this.#targetActor,
         facts: this.#facts,

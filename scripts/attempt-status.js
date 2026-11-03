@@ -1,7 +1,7 @@
 import { ATTEMPT_STATUS } from "./constants.js";
 import { getActorFacts } from "./actor-data.js";
 import { isTargetExhausted } from "./reveal.js";
-import { getActiveEncounter, getRevealedFacts, isAttemptBlocked, isIdentified } from "./repeat-attempts.js";
+import { getEncounterFor, getRevealedFacts, isAttemptBlocked, isIdentified } from "./repeat-attempts.js";
 import { isValidTargetActor } from "./targeting.js";
 
 /**
@@ -19,7 +19,7 @@ export function getAttemptStatus({ actor, targetToken } = {}) {
   const targetActor = targetToken?.actor;
   if (actor?.type !== "character" || !isValidTargetActor(targetActor)) return ATTEMPT_STATUS.INVALID;
 
-  const combat = getActiveEncounter();
+  const combat = getEncounterFor(targetActor);
   if (isAttemptBlocked(combat, actor.uuid, targetActor.uuid)) return ATTEMPT_STATUS.BLOCKED;
 
   const known = getRevealedFacts(combat, actor.uuid, targetActor.uuid);

@@ -9,10 +9,13 @@ const PLAYER_UPDATABLE_FIELDS = ["_id", "round", "turn", "combatants"];
 // `canUserModify` mirrors v14's Combat#canUpdate: the answer depends on the
 // changed fields, so a player asked about no data at all is told "yes".
 // `isGM: false` makes this combat behave as seen from a player's client.
-export function createFakeCombat({ id = "c1", isGM = true } = {}) {
+// `actorUuids` are the combatants' actors, as `combatant.actor.uuid` reads.
+export function createFakeCombat({ id = "c1", isGM = true, started = true, actorUuids = [] } = {}) {
   const flags = {};
   return {
     id,
+    started,
+    combatants: actorUuids.map((uuid) => ({ actor: { uuid } })),
     canUserModify: (user, action, data = {}) => isGM || Object.keys(data).every((key) => PLAYER_UPDATABLE_FIELDS.includes(key)),
     getFlag: (scope, key) => readPath(flags, `${scope}.${key}`),
     setFlag: async (scope, key, value) => {
