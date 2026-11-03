@@ -85,6 +85,21 @@ export function computeLoreDC(actor, ease) {
   return getLevelDC(actor) + DC_ADJUSTMENT_SCALE[combined][1];
 }
 
+/**
+ * The difficulty of each attempt against the same subject in one encounter
+ * (SPEC.md §6.6): GM Core pg. 54 raises the DC for each follow-up, and
+ * after an incredibly hard attempt there's nothing more to recall.
+ */
+export const FOLLOW_UP_STEPS = Object.freeze(["normal", "hard", "very-hard", "incredibly-hard"]);
+
+/**
+ * Raises the DC an attempt would otherwise have (rarity, Lore ease and all)
+ * by its follow-up step's adjustment.
+ */
+export function applyFollowUpStep(dc, step) {
+  return dc + DC_ADJUSTMENT_SCALE.find(([name]) => name === step)[1];
+}
+
 function getRarity(actor) {
   return actor.system?.traits?.rarity ?? "common";
 }

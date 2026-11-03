@@ -94,6 +94,7 @@
 }
 
 .rka-blocked-warning,
+.rka-follow-up-hint,
 .rka-no-skills {
   font-style: italic;
   opacity: 0.8;

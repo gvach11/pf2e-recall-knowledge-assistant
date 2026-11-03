@@ -1,5 +1,6 @@
 import { CATEGORIES, LORE_EASE, SOCKET_NAME } from "./constants.js";
-import { computeLoreDC } from "./data/dc-table.js";
+import { applyFollowUpStep, computeLoreDC } from "./data/dc-table.js";
+import { getEncounterFor, getFollowUpStep } from "./repeat-attempts.js";
 import { isValidTargetActor } from "./targeting.js";
 import { promptGmLoreDecision } from "./applications/lore-decision-prompt.js";
 
@@ -123,8 +124,10 @@ function settle(decision) {
   resolve(decision);
 }
 
-// The GM sees everything: real names, the token's art and both DCs.
+// The GM sees everything: real names, the token's art and both DCs, each
+// raised for a follow-up just as the roll will be (SPEC.md §6.6).
 function buildPromptData({ rollingActor, targetActor, targetToken, loreSlug, category }) {
+  const step = getFollowUpStep(getEncounterFor(targetActor), rollingActor.uuid, targetActor.uuid);
   return {
     characterName: rollingActor.name,
     loreLabel: rollingActor.skills[loreSlug].label,
@@ -132,8 +135,8 @@ function buildPromptData({ rollingActor, targetActor, targetToken, loreSlug, cat
     targetName: targetActor.name,
     targetImg: targetToken?.texture?.src ?? targetActor.img,
     dcs: {
-      easy: computeLoreDC(targetActor, LORE_EASE.EASY),
-      veryEasy: computeLoreDC(targetActor, LORE_EASE.VERY_EASY),
+      easy: applyFollowUpStep(computeLoreDC(targetActor, LORE_EASE.EASY), step),
+      veryEasy: applyFollowUpStep(computeLoreDC(targetActor, LORE_EASE.VERY_EASY), step),
     },
   };
 }

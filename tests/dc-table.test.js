@@ -6,6 +6,8 @@ import {
   computeLoreDC,
   computeDegreeOfSuccess,
   computeLikelihood,
+  applyFollowUpStep,
+  FOLLOW_UP_STEPS,
 } from "../scripts/data/dc-table.js";
 import { DEGREES, LIKELIHOODS, LORE_EASE } from "../scripts/constants.js";
 
@@ -64,6 +66,19 @@ describe("computeLoreDC", () => {
 
   it("falls back to the hazard rule for an NPC without identificationDCs", () => {
     expect(computeLoreDC({ type: "npc", level: 1, system: { traits: { rarity: "common" } } }, LORE_EASE.EASY)).toBe(13);
+  });
+});
+
+describe("applyFollowUpStep", () => {
+  it("climbs one step per follow-up, ending at incredibly hard (GM Core pg. 54)", () => {
+    expect(FOLLOW_UP_STEPS).toEqual(["normal", "hard", "very-hard", "incredibly-hard"]);
+  });
+
+  it("raises whatever DC the attempt would have had by that step's adjustment", () => {
+    expect(applyFollowUpStep(20, "normal")).toBe(20);
+    expect(applyFollowUpStep(20, "hard")).toBe(22);
+    expect(applyFollowUpStep(20, "very-hard")).toBe(25);
+    expect(applyFollowUpStep(20, "incredibly-hard")).toBe(30);
   });
 });
 

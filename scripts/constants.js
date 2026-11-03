@@ -6,6 +6,11 @@ export const DIALOG_ID = "pf2e-recall-knowledge-assistant-dialog";
 // The module's socket channel (module.json has `"socket": true`).
 export const SOCKET_NAME = `module.${MODULE_ID}`;
 
+// World setting keys (registered in settings.js).
+export const SETTINGS = Object.freeze({
+  HARDER_FOLLOW_UPS: "harderFollowUps",
+});
+
 // Public API version (SPEC.md §6.7). Bump only when the API changes in a
 // way callers must detect; other modules check `api.apiVersion >= N`.
 export const API_VERSION = 1;

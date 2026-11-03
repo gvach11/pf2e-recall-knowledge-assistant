@@ -1,8 +1,8 @@
 import { CATEGORIES, DIALOG_ID, LORE_EASE, MODULE_ID } from "../constants.js";
 import { getActorFacts, getLoreSkills, getRelevantSkills } from "../actor-data.js";
-import { computeHiddenDC, computeLikelihood, computeLoreDC } from "../data/dc-table.js";
+import { applyFollowUpStep, computeHiddenDC, computeLikelihood, computeLoreDC } from "../data/dc-table.js";
 import { cancelPendingLoreRequest, requestLoreDecision } from "../lore-approval.js";
-import { getEncounterFor, isAttemptBlocked } from "../repeat-attempts.js";
+import { getEncounterFor, getFollowUpStep, isAttemptBlocked } from "../repeat-attempts.js";
 import { executeRollSequence } from "../roll-sequence.js";
 import { getUnknownTargetLabelKey } from "../targeting.js";
 
@@ -13,7 +13,8 @@ export class RecallKnowledgeDialog extends HandlebarsApplicationMixin(Applicatio
   #targetActor;
   #rollingActor;
   #facts;
-  #dc;
+  // Before any follow-up step (SPEC.md §6.6), which is read fresh each time.
+  #baseDC;
   #selectedCategory = CATEGORIES.WEAKNESSES;
   #selectedSkill = null;
   #isRolling = false;
@@ -28,7 +29,11 @@ export class RecallKnowledgeDialog extends HandlebarsApplicationMixin(Applicatio
     this.#targetActor = targetToken.actor;
     this.#rollingActor = rollingActor;
     this.#facts = getActorFacts(this.#targetActor);
-    this.#dc = computeHiddenDC(this.#targetActor);
+    this.#baseDC = computeHiddenDC(this.#targetActor);
+  }
+
+  #followUpStep(combat) {
+    return getFollowUpStep(combat, this.#rollingActor.uuid, this.#targetActor.uuid);
   }
 
   static DEFAULT_OPTIONS = {
@@ -57,7 +62,8 @@ export class RecallKnowledgeDialog extends HandlebarsApplicationMixin(Applicatio
     const combat = getEncounterFor(this.#targetActor);
     const blocked = isAttemptBlocked(combat, this.#rollingActor.uuid, this.#targetActor.uuid);
 
-    const dc = this.#dc;
+    const followUpStep = this.#followUpStep(combat);
+    const dc = applyFollowUpStep(this.#baseDC, followUpStep);
     const loreSkills = getLoreSkills(this.#rollingActor);
     const loreSlugs = new Set(loreSkills.map(({ slug }) => slug));
     const relevantSlugs = getRelevantSkills(this.#targetActor, this.#facts).filter((slug) => !loreSlugs.has(slug));
@@ -103,6 +109,8 @@ export class RecallKnowledgeDialog extends HandlebarsApplicationMixin(Applicatio
       noSkills: skills.length === 0 && lores.length === 0,
       categories,
       blocked,
+      // The player may know a follow-up is harder (it's RAW), never by how much.
+      isFollowUp: followUpStep !== "normal",
       waitingForGm: this.#waitingForGm,
       canRoll: !blocked && !this.#waitingForGm && !selectedLoreUnavailable && Boolean(this.#selectedSkill),
     };
@@ -152,15 +160,18 @@ export class RecallKnowledgeDialog extends HandlebarsApplicationMixin(Applicatio
         return;
       }
 
+      const combat = getEncounterFor(this.#targetActor);
+      const followUpStep = this.#followUpStep(combat);
       const result = await executeRollSequence({
-        combat: getEncounterFor(this.#targetActor),
+        combat,
         rollingActor: this.#rollingActor,
         targetActor: this.#targetActor,
         facts: this.#facts,
-        dc: this.#dc,
+        dc: applyFollowUpStep(this.#baseDC, followUpStep),
         selectedSkill: this.#selectedSkill,
         selectedCategory: this.#selectedCategory,
         event,
+        followUpStep,
       });
 
       if (result.outcome === "completed") this.close();
@@ -203,16 +214,19 @@ export class RecallKnowledgeDialog extends HandlebarsApplicationMixin(Applicatio
     if (this.rendered && !this.#closing) this.render();
 
     if (decision === LORE_EASE.EASY || decision === LORE_EASE.VERY_EASY) {
+      const rollCombat = getEncounterFor(this.#targetActor);
+      const followUpStep = this.#followUpStep(rollCombat);
       const result = await executeRollSequence({
-        combat: getEncounterFor(this.#targetActor),
+        combat: rollCombat,
         rollingActor: this.#rollingActor,
         targetActor: this.#targetActor,
         facts: this.#facts,
-        dc: computeLoreDC(this.#targetActor, decision),
+        dc: applyFollowUpStep(computeLoreDC(this.#targetActor, decision), followUpStep),
         selectedSkill: lore.slug,
         selectedCategory: this.#selectedCategory,
         event,
         loreEase: decision,
+        followUpStep,
       });
       if (result.outcome === "completed") {
         this.close();

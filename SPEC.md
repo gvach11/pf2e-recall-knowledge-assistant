@@ -27,7 +27,9 @@ info-dump.
   - **Failure**: no information.
   - **Critical Failure**: GM may answer **falsely**, or give no information.
   - Follow-up attempts on the same subject should get progressively harder;
-    once a check is very hard or has failed, further attempts are fruitless.
+    once a character has attempted an incredibly hard check or failed a
+    check, further attempts are fruitless (GM Core pg. 54, "Additional
+    Knowledge").
   [Source: Recall Knowledge rules](https://2e.aonprd.com/Rules.aspx?ID=2638), [Recall Knowledge action](https://2e.aonprd.com/Actions.aspx?ID=2367)
 
 - **DC**: for a creature (has a level), use the **level-based DC**, adjusted
@@ -147,9 +149,11 @@ info-dump.
   attempt.
 - **Repeat-attempt throttle policy**: A character is blocked from further
   attempts against the same target, for the rest of the active encounter,
-  after any **failure or critical failure**. Successes/critical successes
-  never block — a character can keep rolling to fish other categories as
-  long as they keep succeeding.
+  after any **failure or critical failure**, or — with **harder follow-ups**
+  on (the default, §6.6) — after its incredibly hard fourth attempt. Each
+  follow-up is a step harder than the last. With harder follow-ups off,
+  successes never block and every attempt is at the normal DC (the 1.1
+  behavior).
 - **Per-NPC override/blacklist**: Deferred out of v1 (see §8 Out of Scope).
   A GM can control what's revealed today simply by what they put in an
   NPC's Weakness/Resistance/Immunity/Trait fields.
@@ -305,10 +309,24 @@ info-dump.
   forgotten old encounter from catching rolls meant for a different fight
   or made outside combat.
 - Concrete policy: block further attempts against that target for the rest
-  of the encounter after any **failure or critical failure**. This is the
-  module's interpretation of the RAW guidance ("once failed or DC is very
-  hard, further attempts are fruitless") — successes/critical successes
-  never block.
+  of the encounter after any **failure or critical failure**.
+- **Harder follow-ups** (world setting "Harder follow-up attempts", on by
+  default): GM Core pg. 54 raises the DC for each follow-up, and after an
+  incredibly hard attempt further ones are fruitless. Each attempt this
+  character has already made against this target this encounter raises
+  the next one a step: the 1st is at the normal DC, the 2nd hard (+2), the
+  3rd very hard (+5), the 4th incredibly hard (+10), and after the 4th the
+  character is blocked just as after a failure. The step is added to
+  whatever DC the attempt would otherwise have (rarity and, for a Lore, the
+  GM's ease included); it's counted from the record's attempt count, so
+  only completed rolls count — a cancelled roll or declined Lore doesn't.
+  Outside an encounter nothing is counted, so every attempt is normal. The
+  setting is read on every check, so turning it off mid-encounter restores
+  the normal DC (and lifts the attempt cap) right away; failures still
+  block either way.
+- Player-facing: the dialog says a follow-up is harder, never by how much;
+  the DC stays hidden (§6.5). The GM-only detail message names the step,
+  and the GM's Lore popup (§6.8) shows both DCs already raised.
 - The **same per-(character, target) record** also carries: whether the
   character has identified the target (§6.2, stays true once earned) and
   the stable set of true facts already revealed to them (§6.4, so false
@@ -343,7 +361,7 @@ api = {
   - `"invalid"`: the actor isn't a character, or the token's actor isn't an
     NPC or Hazard (or either is missing);
   - `"blocked"`: this character failed against this target earlier this
-    encounter (§6.6);
+    encounter, or has made its last (incredibly hard) follow-up (§6.6);
   - `"exhausted"`: this character has nothing left to learn about it (below);
   - `"available"`: anything else, including no started encounter, since
     nothing is remembered outside one.
@@ -367,7 +385,7 @@ a critical failure never makes a target look more known than it is.
 
 **Accepted trade-off (RAW over secrecy):** a Critical Failure lie on an
 identified target blocks further attempts like any failure (§6.6), while a
-Success never does. A caller that hides Recall Knowledge for `"blocked"`
+Success only does as the last follow-up. A caller that hides Recall Knowledge for `"blocked"`
 targets therefore lets a player infer that a Success-looking result was a
 lie, as reopening the dialog already does. Kept deliberately to follow RAW.
 

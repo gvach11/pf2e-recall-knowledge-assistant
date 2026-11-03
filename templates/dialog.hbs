@@ -7,6 +7,9 @@
   {{#if blocked}}
     <p class="rka-blocked-warning">{{localize "RKA.Warning.AlreadyAttempted"}}</p>
   {{else}}
+    {{#if isFollowUp}}
+      <p class="rka-follow-up-hint">{{localize "RKA.Dialog.FollowUpHint"}}</p>
+    {{/if}}
     <section class="rka-categories">
       <h3>{{localize "RKA.Dialog.CategoryHeading"}}</h3>
       <div class="rka-category-list">

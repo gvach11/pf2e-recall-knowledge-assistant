@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createFakeCombat } from "./helpers/fake-combat.js";
 import {
   attemptKey,
@@ -8,8 +8,24 @@ import {
   isIdentified,
   getRevealedFacts,
   getEncounterFor,
+  getFollowUpStep,
 } from "../scripts/repeat-attempts.js";
-import { DEGREES } from "../scripts/constants.js";
+import { DEGREES, MODULE_ID, SETTINGS } from "../scripts/constants.js";
+
+// The "harder follow-ups" world setting, as game.settings would answer it.
+function stubHarderFollowUps(enabled) {
+  vi.stubGlobal("game", {
+    settings: { get: (scope, key) => (scope === MODULE_ID && key === SETTINGS.HARDER_FOLLOW_UPS ? enabled : undefined) },
+  });
+}
+
+beforeEach(() => {
+  stubHarderFollowUps(true);
+});
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
 
 describe("attemptKey", () => {
   it("produces a flag-path-safe key with no dots", () => {
@@ -78,6 +94,50 @@ describe("isAttemptBlocked / recordAttempt", () => {
     ]);
     expect(isAttemptBlocked(combat, PC_1, TARGET_1)).toBe(true);
     expect(isIdentified(combat, PC_2, TARGET_1)).toBe(true);
+  });
+});
+
+describe("harder follow-ups (GM Core pg. 54)", () => {
+  async function succeed(combat, times) {
+    for (let i = 0; i < times; i++) await recordAttempt(combat, PC_1, TARGET_1, DEGREES.SUCCESS);
+  }
+
+  it("starts at the normal DC, with or without an encounter", () => {
+    expect(getFollowUpStep(null, PC_1, TARGET_1)).toBe("normal");
+    expect(getFollowUpStep(createFakeCombat(), PC_1, TARGET_1)).toBe("normal");
+  });
+
+  it("makes each follow-up a step harder: hard, very hard, then incredibly hard", async () => {
+    const combat = createFakeCombat();
+    await succeed(combat, 1);
+    expect(getFollowUpStep(combat, PC_1, TARGET_1)).toBe("hard");
+    await succeed(combat, 1);
+    expect(getFollowUpStep(combat, PC_1, TARGET_1)).toBe("very-hard");
+    await succeed(combat, 1);
+    expect(getFollowUpStep(combat, PC_1, TARGET_1)).toBe("incredibly-hard");
+  });
+
+  it("blocks further attempts once an incredibly hard one has been made", async () => {
+    const combat = createFakeCombat();
+    await succeed(combat, 3);
+    expect(isAttemptBlocked(combat, PC_1, TARGET_1)).toBe(false);
+    await succeed(combat, 1);
+    expect(isAttemptBlocked(combat, PC_1, TARGET_1)).toBe(true);
+  });
+
+  it("counts each character's attempts at each target separately", async () => {
+    const combat = createFakeCombat();
+    await succeed(combat, 2);
+    expect(getFollowUpStep(combat, PC_2, TARGET_1)).toBe("normal");
+    expect(getFollowUpStep(combat, PC_1, TARGET_2)).toBe("normal");
+  });
+
+  it("keeps every attempt at the normal DC, never running out, when the setting is off", async () => {
+    stubHarderFollowUps(false);
+    const combat = createFakeCombat();
+    await succeed(combat, 5);
+    expect(getFollowUpStep(combat, PC_1, TARGET_1)).toBe("normal");
+    expect(isAttemptBlocked(combat, PC_1, TARGET_1)).toBe(false);
   });
 });
 

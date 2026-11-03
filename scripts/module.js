@@ -4,8 +4,10 @@ import { ensureHotbarMacro } from "./macro.js";
 import { registerSocket } from "./socket.js";
 import { getAttemptStatus } from "./attempt-status.js";
 import { onUserConnectionChange } from "./lore-approval.js";
+import { registerSettings } from "./settings.js";
 
 Hooks.once("init", () => {
+  registerSettings();
   registerSceneControl();
 });
 

@@ -85,6 +85,19 @@ describe("renderResultChatMessage", () => {
     expect(createCalls[1].content).not.toContain("GmLoreNote");
   });
 
+  it("notes a follow-up attempt's raised difficulty in the GM-only message only", async () => {
+    game.i18n.format = (key, data) => `${key}${JSON.stringify(data)}`;
+    await renderResultChatMessage(baseArgs({ followUpStep: "very-hard" }));
+    expect(createCalls[1].content).toContain('RKA.Chat.GmFollowUpNote{"step":"RKA.FollowUpStep.very-hard"}');
+    expect(renderTemplateSpy.mock.calls[0][1]).not.toHaveProperty("followUpStep");
+    expect(createCalls[0].content).not.toContain("GmFollowUpNote");
+  });
+
+  it("adds no follow-up note to a first attempt", async () => {
+    await renderResultChatMessage(baseArgs({ followUpStep: "normal" }));
+    expect(createCalls[1].content).not.toContain("GmFollowUpNote");
+  });
+
   it("creates a second, GM-only message whispered to GM recipients containing the true dc/roll/degree", async () => {
     await renderResultChatMessage(baseArgs({ dc: 22, rollTotal: 30, degree: DEGREES.CRITICAL_SUCCESS }));
     const gmMessage = createCalls[1];

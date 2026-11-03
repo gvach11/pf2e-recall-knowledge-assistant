@@ -6,6 +6,7 @@ vi.mock("../scripts/ui/scene-control.js", () => ({
 }));
 vi.mock("../scripts/macro.js", () => ({ ensureHotbarMacro: vi.fn() }));
 vi.mock("../scripts/socket.js", () => ({ registerSocket: vi.fn() }));
+vi.mock("../scripts/settings.js", () => ({ registerSettings: vi.fn() }));
 
 describe("module ready hook", () => {
   const moduleEntry = {};
@@ -17,6 +18,7 @@ describe("module ready hook", () => {
     vi.stubGlobal("game", { modules: { get: () => moduleEntry }, user: { isGM: true } });
 
     await import("../scripts/module.js");
+    callbacks.init();
     callbacks.ready();
   });
 
@@ -29,6 +31,12 @@ describe("module ready hook", () => {
     const { getAttemptStatus } = await import("../scripts/attempt-status.js");
 
     expect(moduleEntry.api).toEqual({ apiVersion: 1, openDialog: openRecallKnowledgeDialog, getAttemptStatus });
+  });
+
+  it("registers the module's settings on init", async () => {
+    const { registerSettings } = await import("../scripts/settings.js");
+
+    expect(registerSettings).toHaveBeenCalled();
   });
 
   it("ends a waiting Lore request when GMs connect or leave", async () => {

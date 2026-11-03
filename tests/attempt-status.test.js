@@ -36,7 +36,7 @@ describe("getAttemptStatus", () => {
   beforeEach(() => {
     targetToken = { actor: ghoul() };
     combat = createFakeCombat({ actorUuids: [targetToken.actor.uuid] });
-    vi.stubGlobal("game", { combat, combats: [combat] });
+    vi.stubGlobal("game", { combat, combats: [combat], settings: { get: () => true } });
   });
 
   afterEach(() => {
@@ -76,6 +76,11 @@ describe("getAttemptStatus", () => {
 
   it("blocked after a failure", async () => {
     await recordAttempt(combat, pc.uuid, targetToken.actor.uuid, "failure");
+    expect(getAttemptStatus({ actor: pc, targetToken })).toBe("blocked");
+  });
+
+  it("blocked once an incredibly hard follow-up has been made", async () => {
+    for (let i = 0; i < 4; i++) await recordAttempt(combat, pc.uuid, targetToken.actor.uuid, "success");
     expect(getAttemptStatus({ actor: pc, targetToken })).toBe("blocked");
   });
 

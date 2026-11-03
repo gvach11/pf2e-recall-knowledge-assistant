@@ -13,6 +13,8 @@ import {
   requestLoreDecision,
 } from "../scripts/lore-approval.js";
 import { SOCKET_NAME } from "../scripts/constants.js";
+import { recordAttempt } from "../scripts/repeat-attempts.js";
+import { createFakeCombat } from "./helpers/fake-combat.js";
 
 const GM = { id: "gm1", isSelf: false };
 const PLAYER = { id: "player1" };
@@ -184,6 +186,15 @@ describe("handleLoreRequest (GM)", () => {
       targetImg: "skeleton.webp",
       dcs: { easy: 11, veryEasy: 8 },
     });
+  });
+
+  it("shows the GM both Lore DCs raised for a follow-up attempt", async () => {
+    const combat = createFakeCombat({ actorUuids: [skeleton.uuid] });
+    await recordAttempt(combat, wizard.uuid, skeleton.uuid, "success");
+    Object.assign(game, { combat, combats: [combat], settings: { get: () => true } });
+    controllablePrompt();
+    handleLoreRequest(request(), PLAYER.id);
+    expect(promptGmLoreDecision).toHaveBeenCalledWith(expect.objectContaining({ dcs: { easy: 13, veryEasy: 10 } }));
   });
 
   it("replies to the requester with the GM's decision", async () => {

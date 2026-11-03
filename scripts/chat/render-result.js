@@ -17,6 +17,8 @@ const TEMPLATE_PATH = `modules/${MODULE_ID}/templates/chat-result.hbs`;
  *
  * A Lore roll (`loreEase` set) says so in the GM-only message, with the
  * ease the GM chose; the player's card never mentions it (SPEC.md §6.8).
+ * A follow-up attempt (`followUpStep` above "normal") likewise notes its
+ * raised difficulty for the GM only (SPEC.md §6.6).
  *
  * @param {{reveal: import("../reveal.js").Reveal}} args
  */
@@ -29,6 +31,7 @@ export async function renderResultChatMessage({
   alreadyIdentified,
   reveal,
   loreEase,
+  followUpStep,
 }) {
   const headerName =
     IDENTIFYING_DEGREES.has(degree) || alreadyIdentified
@@ -58,11 +61,16 @@ export async function renderResultChatMessage({
   const loreNote = loreEase
     ? `<p>${game.i18n.format("RKA.Chat.GmLoreNote", { ease: game.i18n.localize(`RKA.Lore.Ease.${loreEase}`) })}</p>`
     : "";
+  const followUpNote =
+    followUpStep && followUpStep !== "normal"
+      ? `<p>${game.i18n.format("RKA.Chat.GmFollowUpNote", { step: game.i18n.localize(`RKA.FollowUpStep.${followUpStep}`) })}</p>`
+      : "";
   const gmContent = `
     <div class="rka-gm-detail">
       <strong>${game.i18n.localize("RKA.Chat.GmDetailTitle")}</strong>
       <p>${targetActor.name} — DC ${dc} — Roll ${rollTotal} — ${game.i18n.localize(`RKA.Degree.${degree}`)}</p>
       ${loreNote}
+      ${followUpNote}
     </div>
   `;
   await ChatMessage.create({

@@ -1,4 +1,6 @@
 import { IDENTIFYING_DEGREES, MODULE_ID } from "./constants.js";
+import { FOLLOW_UP_STEPS } from "./data/dc-table.js";
+import { harderFollowUps } from "./settings.js";
 
 const FLAG_KEY = "attempts";
 
@@ -46,7 +48,8 @@ function getRecord(combat, actorUuid, targetUuid) {
 
 /**
  * Reads whether (actorUuid, targetUuid) is currently throttled for this
- * combat. Keyed by the *rolling character*, not the Foundry user account —
+ * combat: after a failure, or — with harder follow-ups on — once the
+ * character has made an incredibly hard attempt (SPEC.md §6.6). Keyed by the *rolling character*, not the Foundry user account —
  * Recall Knowledge represents a character's own memory, so one player
  * controlling multiple PCs (or one person testing several party members
  * from a single login) must not have one character's failure block
@@ -54,7 +57,22 @@ function getRecord(combat, actorUuid, targetUuid) {
  * (SPEC.md §6.6).
  */
 export function isAttemptBlocked(combat, actorUuid, targetUuid) {
-  return Boolean(getRecord(combat, actorUuid, targetUuid)?.blocked);
+  const record = getRecord(combat, actorUuid, targetUuid);
+  if (!record) return false;
+  return record.blocked || (harderFollowUps() && record.count >= FOLLOW_UP_STEPS.length);
+}
+
+/**
+ * How hard this character's next attempt at this target is (SPEC.md §6.6):
+ * one step up `FOLLOW_UP_STEPS` per attempt already made this encounter.
+ * Always "normal" outside an encounter or with harder follow-ups off. Read
+ * from the setting each time, so turning it off mid-fight takes effect on
+ * the very next attempt.
+ */
+export function getFollowUpStep(combat, actorUuid, targetUuid) {
+  const count = getRecord(combat, actorUuid, targetUuid)?.count ?? 0;
+  if (count === 0 || !harderFollowUps()) return FOLLOW_UP_STEPS[0];
+  return FOLLOW_UP_STEPS[Math.min(count, FOLLOW_UP_STEPS.length - 1)];
 }
 
 /**

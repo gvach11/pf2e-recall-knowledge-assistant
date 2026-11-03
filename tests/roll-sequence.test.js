@@ -87,6 +87,15 @@ describe("executeRollSequence", () => {
     expect(renderResultChatMessage).toHaveBeenCalledWith(expect.objectContaining({ dc: 11, loreEase: "easy" }));
   });
 
+  it("passes a follow-up attempt's step on to the chat message", async () => {
+    rollRecallKnowledge.mockResolvedValue({ rollTotal: 25, naturalD20: 12 });
+    renderResultChatMessage.mockResolvedValue(undefined);
+
+    await executeRollSequence(baseArgs({ dc: 22, followUpStep: "hard" }));
+
+    expect(renderResultChatMessage).toHaveBeenCalledWith(expect.objectContaining({ dc: 22, followUpStep: "hard" }));
+  });
+
   it("completes the full sequence and persists the attempt after the chat message renders", async () => {
     rollRecallKnowledge.mockResolvedValue({ rollTotal: 25, naturalD20: 12 });
     renderResultChatMessage.mockResolvedValue(undefined);
