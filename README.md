@@ -18,7 +18,7 @@ Found something odd? Please report it on the [issue tracker](https://github.com/
   - **Failure**: nothing certain
   - **Critical Failure**: once you've identified the creature, a believable false fact that never contradicts what you already know; before that, the same as a Failure
 - **Lore skills, ruled on by the GM**: every Lore your character has is listed as "GM decides". Rolling one asks the GM, who declines it or allows it at an easy or very easy DC; the roll then works like any other. A decline costs nothing, so you can pick another skill
-- **Identity stays hidden** until earned: the dialog and failed results say "Unknown Creature" / "Unknown Hazard"
+- **Identity stays hidden** until earned: the dialog and failed results say "Unknown Creature" / "Unknown Hazard" until that character has identified the target in this encounter
 - **Repeat attempts**: in the started encounter the target is part of, a Failure or Critical Failure blocks that character from trying again on that target until the encounter ends. Tracked per character, not per player
 - **Harder follow-ups (RAW)**: each further attempt against the same target in an encounter is harder: hard, then very hard, then incredibly hard. After that there's nothing more to recall. The dialog tells the player a follow-up is harder without giving the DC. Turn off **Harder follow-up attempts** in the module settings to keep every attempt at the normal DC
 - **Hazards supported**, with hazard-appropriate skills

@@ -4,6 +4,13 @@ All notable changes to **PF2e Recall Knowledge Assistant** are documented here.
 
 ---
 
+## [1.2.1] — 2026-11-03
+
+### Fixes
+- The dialog now names a target the character has already identified this encounter, matching the chat, instead of always saying "Unknown Creature". Before 1.2's harder follow-ups this rarely showed
+
+---
+
 ## [1.2.0] — 2026-11-03
 
 ### Harder follow-ups (RAW)
