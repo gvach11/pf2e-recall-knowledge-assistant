@@ -1,5 +1,6 @@
 import { getValidatedSingleTarget, validateTargetToken } from "../targeting.js";
 import { RecallKnowledgeDialog } from "../applications/recall-knowledge-dialog.js";
+import { DIALOG_ID } from "../constants.js";
 
 /**
  * Registers the "Recall Knowledge" tool in the Token layer scene controls.
@@ -30,7 +31,7 @@ export function registerSceneControl() {
  * public API (SPEC.md §6.7) — and a named roller must be a character the
  * user owns; it's refused, never swapped for someone else.
  */
-export function openRecallKnowledgeDialog({ actor, targetToken: givenToken } = {}) {
+export async function openRecallKnowledgeDialog({ actor, targetToken: givenToken } = {}) {
   const targetToken = givenToken ? validateTargetToken(givenToken) : getValidatedSingleTarget();
   if (!targetToken) return;
 
@@ -45,6 +46,10 @@ export function openRecallKnowledgeDialog({ actor, targetToken: givenToken } = {
     return;
   }
 
+  // One dialog at a time. Rendering a new one over the old would leave the
+  // old instance alive but unclosed — and one waiting on the GM for a Lore
+  // ruling could still roll later. Closing it cancels that wait (§6.8).
+  await foundry.applications.instances.get(DIALOG_ID)?.close();
   new RecallKnowledgeDialog({ targetToken, rollingActor }).render(true);
 }
 

@@ -1,4 +1,4 @@
-import { CATEGORIES, LORE_EASE, MODULE_ID } from "../constants.js";
+import { CATEGORIES, DIALOG_ID, LORE_EASE, MODULE_ID } from "../constants.js";
 import { getActorFacts, getLoreSkills, getRelevantSkills } from "../actor-data.js";
 import { computeHiddenDC, computeLikelihood, computeLoreDC } from "../data/dc-table.js";
 import { cancelPendingLoreRequest, requestLoreDecision } from "../lore-approval.js";
@@ -19,6 +19,7 @@ export class RecallKnowledgeDialog extends HandlebarsApplicationMixin(Applicatio
   #isRolling = false;
   // True while a Lore request waits on another client's GM (SPEC.md §6.8).
   #waitingForGm = false;
+  #closing = false;
   #userConnectedHook = null;
 
   constructor({ targetToken, rollingActor }, options = {}) {
@@ -31,7 +32,7 @@ export class RecallKnowledgeDialog extends HandlebarsApplicationMixin(Applicatio
   }
 
   static DEFAULT_OPTIONS = {
-    id: "pf2e-recall-knowledge-assistant-dialog",
+    id: DIALOG_ID,
     classes: ["pf2e-recall-knowledge-assistant"],
     tag: "div",
     window: {
@@ -113,10 +114,17 @@ export class RecallKnowledgeDialog extends HandlebarsApplicationMixin(Applicatio
     this.#userConnectedHook = Hooks.on("userConnected", () => this.render());
   }
 
+  // Cancelled before the close animation, not after it: a ruling arriving
+  // during the animation would otherwise still roll (SPEC.md §6.8).
+  async _preClose(options) {
+    await super._preClose(options);
+    this.#closing = true;
+    if (this.#waitingForGm) cancelPendingLoreRequest();
+  }
+
   _onClose(options) {
     super._onClose(options);
     Hooks.off("userConnected", this.#userConnectedHook);
-    if (this.#waitingForGm) cancelPendingLoreRequest();
   }
 
   static #onSelectCategory(event, target) {
@@ -190,6 +198,9 @@ export class RecallKnowledgeDialog extends HandlebarsApplicationMixin(Applicatio
     } finally {
       this.#waitingForGm = false;
     }
+    // Drop "Waiting for the GM…" before pf2e's own roll dialog opens. Not
+    // while closing: still "rendered" then, but must not be drawn again.
+    if (this.rendered && !this.#closing) this.render();
 
     if (decision === LORE_EASE.EASY || decision === LORE_EASE.VERY_EASY) {
       const result = await executeRollSequence({
@@ -212,7 +223,5 @@ export class RecallKnowledgeDialog extends HandlebarsApplicationMixin(Applicatio
     } else if (decision === "unavailable") {
       ui.notifications.warn(game.i18n.localize("RKA.Lore.GmUnavailable"));
     }
-
-    if (this.rendered) this.render();
   }
 }

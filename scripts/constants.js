@@ -1,5 +1,8 @@
 export const MODULE_ID = "pf2e-recall-knowledge-assistant";
 
+// The Recall Knowledge dialog's application id; only one is open at a time.
+export const DIALOG_ID = "pf2e-recall-knowledge-assistant-dialog";
+
 // The module's socket channel (module.json has `"socket": true`).
 export const SOCKET_NAME = `module.${MODULE_ID}`;
 
