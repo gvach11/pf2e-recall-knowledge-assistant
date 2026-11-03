@@ -163,3 +163,15 @@ export function getRelevantSkills(actor, facts) {
   }
   return [...skills];
 }
+
+/**
+ * Every Lore skill the character has, untrained ones included (SPEC.md
+ * §6.8). pf2e lists Lores among `actor.skills`, marked `lore: true`.
+ * Whether one applies to a target is the GM's ruling, so none is matched
+ * to traits here.
+ */
+export function getLoreSkills(actor) {
+  return Object.values(actor.skills ?? {})
+    .filter((statistic) => statistic.lore)
+    .map((statistic) => ({ slug: statistic.slug, label: statistic.label }));
+}

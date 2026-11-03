@@ -1,4 +1,4 @@
-import { DEGREES, LIKELIHOODS } from "../constants.js";
+import { DEGREES, LIKELIHOODS, LORE_EASE } from "../constants.js";
 
 // Level-based DC table (SPEC.md §2 / GM Core pg. 52), verified against pf2e's own dc.ts.
 export const LEVEL_DC_TABLE = Object.freeze({
@@ -49,11 +49,49 @@ export function computeHiddenDC(actor) {
     return actor.identificationDCs.standard.dc;
   }
 
+  const adjustment = RARITY_ADJUSTMENT[getRarity(actor)] ?? 0;
+  return getLevelDC(actor) + adjustment;
+}
+
+// pf2e's DC-adjustment scale, easiest first, with "normal" in the middle.
+const DC_ADJUSTMENT_SCALE = Object.freeze([
+  ["incredibly-easy", -10],
+  ["very-easy", -5],
+  ["easy", -2],
+  ["normal", 0],
+  ["hard", 2],
+  ["very-hard", 5],
+  ["incredibly-hard", 10],
+]);
+const NORMAL_STEP = 3;
+const RARITY_STEP = Object.freeze({ common: "normal", uncommon: "hard", rare: "very-hard", unique: "incredibly-hard" });
+
+/**
+ * The DC for a Lore the GM ruled applicable, at the chosen ease (SPEC.md
+ * §6.8). NPCs delegate to pf2e's own `identificationDCs.lore` (easy, then
+ * very easy). Hazards lack it, so we mirror pf2e's rule: rarity and ease
+ * are added as steps on its DC-adjustment scale and clamped to its ends,
+ * which is why a rare hazard's easy Lore DC is +2 rather than +5-2.
+ */
+export function computeLoreDC(actor, ease) {
+  const npcLoreDCs = actor.type === "npc" ? actor.identificationDCs?.lore : undefined;
+  if (npcLoreDCs?.length === 2) {
+    return (ease === LORE_EASE.VERY_EASY ? npcLoreDCs[1] : npcLoreDCs[0]).dc;
+  }
+
+  const stepIndex = (name) => DC_ADJUSTMENT_SCALE.findIndex(([step]) => step === name);
+  const rarityIndex = stepIndex(RARITY_STEP[getRarity(actor)] ?? "normal");
+  const combined = Math.min(Math.max(rarityIndex + stepIndex(ease) - NORMAL_STEP, 0), DC_ADJUSTMENT_SCALE.length - 1);
+  return getLevelDC(actor) + DC_ADJUSTMENT_SCALE[combined][1];
+}
+
+function getRarity(actor) {
+  return actor.system?.traits?.rarity ?? "common";
+}
+
+function getLevelDC(actor) {
   const level = actor.level ?? actor.system?.details?.level?.value ?? 0;
-  const rarity = actor.system?.traits?.rarity ?? "common";
-  const baseDC = LEVEL_DC_TABLE[level] ?? LEVEL_DC_TABLE[clampLevel(level)];
-  const adjustment = RARITY_ADJUSTMENT[rarity] ?? 0;
-  return baseDC + adjustment;
+  return LEVEL_DC_TABLE[level] ?? LEVEL_DC_TABLE[clampLevel(level)];
 }
 
 function clampLevel(level) {

@@ -31,6 +31,13 @@ export const LIKELIHOODS = Object.freeze({
   UNFAMILIAR: "unfamiliar",
 });
 
+// How much easier the GM rules an applicable Lore to be (SPEC.md §6.8).
+// The values are pf2e's own DC-adjustment names.
+export const LORE_EASE = Object.freeze({
+  EASY: "easy",
+  VERY_EASY: "very-easy",
+});
+
 // Degrees that actually earn the identity reveal (SPEC.md §6.2).
 export const IDENTIFYING_DEGREES = new Set([DEGREES.SUCCESS, DEGREES.CRITICAL_SUCCESS]);
 

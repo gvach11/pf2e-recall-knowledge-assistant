@@ -5,6 +5,7 @@ import {
   pickCategoryEntry,
   pickFactFromOtherCategory,
   getRelevantSkills,
+  getLoreSkills,
   pickIdentityTrait,
 } from "../scripts/actor-data.js";
 import { CATEGORIES } from "../scripts/constants.js";
@@ -216,5 +217,21 @@ describe("getRelevantSkills", () => {
     it("finds no skill for a bare 'trap' with nothing saying how it works", () => {
       expect(skillsFor(["trap"])).toEqual([]);
     });
+  });
+});
+
+describe("getLoreSkills", () => {
+  it("lists every Lore statistic, untrained ones included", () => {
+    const actor = {
+      skills: {
+        arcana: { slug: "arcana", label: "Arcana", rank: 2 },
+        "undead-lore": { slug: "undead-lore", label: "Undead Lore", lore: true, rank: 0 },
+      },
+    };
+    expect(getLoreSkills(actor)).toEqual([{ slug: "undead-lore", label: "Undead Lore" }]);
+  });
+
+  it("is empty for an actor without skills", () => {
+    expect(getLoreSkills({})).toEqual([]);
   });
 });
