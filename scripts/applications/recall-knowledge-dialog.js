@@ -2,9 +2,9 @@ import { CATEGORIES, DIALOG_ID, LORE_EASE, MODULE_ID } from "../constants.js";
 import { getActorFacts, getLoreSkills, getRelevantSkills } from "../actor-data.js";
 import { applyFollowUpStep, computeHiddenDC, computeLikelihood, computeLoreDC } from "../data/dc-table.js";
 import { cancelPendingLoreRequest, requestLoreDecision } from "../lore-approval.js";
-import { getEncounterFor, getFollowUpStep, isAttemptBlocked } from "../repeat-attempts.js";
+import { getEncounterFor, getFollowUpStep, isAttemptBlocked, isIdentified } from "../repeat-attempts.js";
 import { executeRollSequence } from "../roll-sequence.js";
-import { getUnknownTargetLabelKey } from "../targeting.js";
+import { getTargetDisplayName } from "../targeting.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -98,9 +98,12 @@ export class RecallKnowledgeDialog extends HandlebarsApplicationMixin(Applicatio
     }));
 
     return {
-      // Never the real name here — the dialog always renders before a roll
-      // has happened, so identity hasn't been earned yet (SPEC.md §6.2).
-      targetName: game.i18n.localize(getUnknownTargetLabelKey(this.#targetActor)),
+      // The real name only once this character has identified the target
+      // this encounter, as the chat header does (SPEC.md §6.2).
+      targetName: getTargetDisplayName(
+        this.#targetActor,
+        isIdentified(combat, this.#rollingActor.uuid, this.#targetActor.uuid)
+      ),
       // The token art the player already sees on the canvas, not the actor
       // portrait, which can give away more than the token does.
       targetImg: this.#targetToken.document.texture.src,

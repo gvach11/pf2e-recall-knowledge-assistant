@@ -231,18 +231,20 @@ info-dump.
 - A Roll button that invokes the check (via the system's built-in Recall
   Knowledge action, per §4 "Roll execution") and then resolves the reveal
   based on the result, computed against the hidden DC ourselves.
-- **The target's real name is never shown** in the dialog header — the
-  dialog always renders before a roll happens, so identity hasn't been
-  earned yet. Use a generic placeholder ("Unknown Creature") instead. The
-  same applies to the chat message header on Failure/Critical Failure —
+- **The target's real name isn't shown** in the dialog header until this
+  character has identified it (see the next point): a first attempt hasn't
+  earned identity yet, so it shows a generic placeholder ("Unknown
+  Creature" / "Unknown Hazard"). A follow-up after a Success shows the real
+  name, matching what the chat already told the player. The same applies
+  to the chat message header on Failure/Critical Failure —
   only Success/Critical Success actually earns the identity reveal, and
   that happens through the baseline text itself (§6.3), not a header
   label. Showing the real name unconditionally would leak identity for
   free and override any GM choice to hide a token's nameplate.
 - **Identity, once earned, stays known this encounter**: a character who
   identified the target on an earlier attempt (Success/Critical Success)
-  must keep seeing the real name in the header on later attempts, even a
-  later Critical Failure — a bad roll doesn't erase something already
+  must keep seeing the real name in the dialog and chat headers on later
+  attempts, even after a later Critical Failure — a bad roll doesn't erase something already
   learned. This is tracked per (character, target) alongside the
   repeat-attempt throttle state (§6.6), not derived from the current
   attempt's degree alone.

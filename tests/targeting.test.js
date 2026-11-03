@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { getUnknownTargetLabelKey, getValidatedSingleTarget, validateTargetToken } from "../scripts/targeting.js";
+import { getTargetDisplayName, getUnknownTargetLabelKey, getValidatedSingleTarget, validateTargetToken } from "../scripts/targeting.js";
 
 function fakeTargets(tokens) {
   return {
@@ -76,6 +76,25 @@ describe("getUnknownTargetLabelKey", () => {
 
   it("calls an unidentified NPC an unknown creature", () => {
     expect(getUnknownTargetLabelKey({ type: "npc" })).toBe("RKA.UnknownTarget");
+  });
+});
+
+describe("getTargetDisplayName", () => {
+  beforeEach(() => {
+    vi.stubGlobal("game", { i18n: { localize: (key) => key } });
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("names a target the character has identified", () => {
+    expect(getTargetDisplayName({ type: "npc", name: "Wight" }, true)).toBe("Wight");
+  });
+
+  it("hides a target the character hasn't identified behind the placeholder", () => {
+    expect(getTargetDisplayName({ type: "npc", name: "Wight" }, false)).toBe("RKA.UnknownTarget");
+    expect(getTargetDisplayName({ type: "hazard", name: "Hidden Pit" }, false)).toBe("RKA.UnknownHazard");
   });
 });
 

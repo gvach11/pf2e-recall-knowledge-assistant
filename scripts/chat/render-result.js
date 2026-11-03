@@ -1,5 +1,5 @@
 import { IDENTIFYING_DEGREES, MODULE_ID } from "../constants.js";
-import { getUnknownTargetLabelKey } from "../targeting.js";
+import { getTargetDisplayName } from "../targeting.js";
 
 const TEMPLATE_PATH = `modules/${MODULE_ID}/templates/chat-result.hbs`;
 
@@ -33,10 +33,7 @@ export async function renderResultChatMessage({
   loreEase,
   followUpStep,
 }) {
-  const headerName =
-    IDENTIFYING_DEGREES.has(degree) || alreadyIdentified
-      ? targetActor.name
-      : game.i18n.localize(getUnknownTargetLabelKey(targetActor));
+  const headerName = getTargetDisplayName(targetActor, IDENTIFYING_DEGREES.has(degree) || alreadyIdentified);
 
   const baseline = reveal.baseline
     ? game.i18n.format("RKA.Chat.Baseline", {

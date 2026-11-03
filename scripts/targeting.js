@@ -53,3 +53,12 @@ export function validateTargetToken(token) {
 export function getUnknownTargetLabelKey(actor) {
   return actor?.type === "hazard" ? "RKA.UnknownHazard" : "RKA.UnknownTarget";
 }
+
+/**
+ * What a character calls the target (SPEC.md §6.2): its real name once
+ * identified, otherwise the placeholder. The dialog and the chat header
+ * both use it, so they never disagree.
+ */
+export function getTargetDisplayName(actor, identified) {
+  return identified ? actor.name : game.i18n.localize(getUnknownTargetLabelKey(actor));
+}
