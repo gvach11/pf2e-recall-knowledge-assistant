@@ -6,6 +6,8 @@ Recall Knowledge in one click: target an enemy, pick what you're trying to remem
 
 Found something odd? Please report it on the [issue tracker](https://github.com/gvach11/pf2e-recall-knowledge-assistant/issues).
 
+![A player targets a Wight and opens the Recall Knowledge dialog](docs/screenshots/01-player-view-dialog.jpg)
+
 ---
 
 ## Features
@@ -23,6 +25,18 @@ Found something odd? Please report it on the [issue tracker](https://github.com/
 - **Harder follow-ups (RAW)**: each further attempt against the same target in an encounter is harder: hard, then very hard, then incredibly hard. After that there's nothing more to recall. The dialog tells the player a follow-up is harder without giving the DC. Turn off **Harder follow-up attempts** in the module settings to keep every attempt at the normal DC
 - **Hazards supported**, with hazard-appropriate skills
 - **GM-only detail message** showing the real target name, DC, roll total, and degree
+
+---
+
+## Screenshots
+
+| Follow-ups get harder | The GM rules on Lore |
+|---|---|
+| <img src="docs/screenshots/05-dialog-follow-up.png" alt="The dialog on a follow-up attempt, naming the Wight and noting that digging deeper is harder" width="400"> | <img src="docs/screenshots/07-gm-lore-popup.png" alt="The GM's popup: Ezren wants to use Undead Lore; Decline, Easy (DC 18) or Very easy (DC 15)" width="400"> |
+| **The player sees what they learned** | **The GM sees the details** |
+| <img src="docs/screenshots/04-chat-result-player.png" alt="The player's chat card: Wight is an undead, immune to unconscious" width="400"> | <img src="docs/screenshots/08-gm-chat-view.png" alt="The GM's chat with player cards and GM-only details, including the DC and the follow-up step" width="300"> |
+
+More in [docs/screenshots](docs/screenshots).
 
 ---
 
@@ -45,7 +59,7 @@ https://raw.githubusercontent.com/gvach11/pf2e-recall-knowledge-assistant/master
 
 If you control one of your characters' tokens, that character rolls; otherwise your assigned character does.
 
-The module has no settings. A GM controls what can be revealed through the NPC's own Weakness, Resistance, Immunity and Trait fields.
+The module has one world setting, **Harder follow-up attempts** (on by default; see Features). A GM controls what can be revealed through the NPC's own Weakness, Resistance, Immunity and Trait fields.
 
 ---
 
@@ -63,7 +77,7 @@ Once the world is ready, the module publishes an API at `game.modules.get("pf2e-
 |---|---|
 | `apiVersion` | `1`. Check `api.apiVersion >= 1` before using the members below. |
 | `openDialog({ actor, targetToken } = {})` | Opens the dialog. With no arguments it uses the user's single current target and their controlled or assigned character. `actor` must be a character the user owns; `targetToken` must be an NPC or hazard token on the current scene (a Token or its TokenDocument). |
-| `getAttemptStatus({ actor, targetToken })` | Read-only. `"available"`, `"blocked"` (failed against it this encounter), `"exhausted"` (nothing left to learn), or `"invalid"` (not a character rolling against an NPC or hazard). |
+| `getAttemptStatus({ actor, targetToken })` | Read-only. `"available"`, `"blocked"` (failed against it this encounter, or made its last, incredibly hard follow-up), `"exhausted"` (nothing left to learn), or `"invalid"` (not a character rolling against an NPC or hazard). |
 
 ---
 
