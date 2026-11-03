@@ -72,6 +72,19 @@ describe("renderResultChatMessage", () => {
     expect(renderTemplateSpy.mock.calls[0][1]).not.toHaveProperty("degree");
   });
 
+  it("notes a Lore roll and the GM's ease in the GM-only message only", async () => {
+    game.i18n.format = (key, data) => `${key}${JSON.stringify(data)}`;
+    await renderResultChatMessage(baseArgs({ loreEase: "very-easy" }));
+    expect(createCalls[1].content).toContain('RKA.Chat.GmLoreNote{"ease":"RKA.Lore.Ease.very-easy"}');
+    expect(renderTemplateSpy.mock.calls[0][1]).not.toHaveProperty("loreEase");
+    expect(createCalls[0].content).not.toContain("GmLoreNote");
+  });
+
+  it("adds no Lore note to a regular roll", async () => {
+    await renderResultChatMessage(baseArgs());
+    expect(createCalls[1].content).not.toContain("GmLoreNote");
+  });
+
   it("creates a second, GM-only message whispered to GM recipients containing the true dc/roll/degree", async () => {
     await renderResultChatMessage(baseArgs({ dc: 22, rollTotal: 30, degree: DEGREES.CRITICAL_SUCCESS }));
     const gmMessage = createCalls[1];

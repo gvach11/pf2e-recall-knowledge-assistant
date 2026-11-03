@@ -78,6 +78,15 @@ describe("executeRollSequence", () => {
     expect(consoleErrorSpy).not.toHaveBeenCalled();
   });
 
+  it("passes a Lore roll's ease on to the chat message", async () => {
+    rollRecallKnowledge.mockResolvedValue({ rollTotal: 25, naturalD20: 12 });
+    renderResultChatMessage.mockResolvedValue(undefined);
+
+    await executeRollSequence(baseArgs({ selectedSkill: "undead-lore", dc: 11, loreEase: "easy" }));
+
+    expect(renderResultChatMessage).toHaveBeenCalledWith(expect.objectContaining({ dc: 11, loreEase: "easy" }));
+  });
+
   it("completes the full sequence and persists the attempt after the chat message renders", async () => {
     rollRecallKnowledge.mockResolvedValue({ rollTotal: 25, naturalD20: 12 });
     renderResultChatMessage.mockResolvedValue(undefined);

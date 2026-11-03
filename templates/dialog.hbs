@@ -13,6 +13,7 @@
         {{#each categories}}
           <label class="rka-category-option {{#if this.selected}}selected{{/if}}">
             <input type="radio" name="category" value="{{this.key}}" {{#if this.selected}}checked{{/if}}
+                   {{#if @root.waitingForGm}}disabled{{/if}}
                    data-action="selectCategory" data-category="{{this.key}}" />
             {{this.label}}
           </label>
@@ -29,18 +30,34 @@
         {{#each skills}}
           <label class="rka-skill-option rka-likelihood-{{this.likelihood}} {{#if this.selected}}selected{{/if}}">
             <input type="radio" name="skill" value="{{this.slug}}" {{#if this.selected}}checked{{/if}}
+                   {{#if @root.waitingForGm}}disabled{{/if}}
                    data-action="selectSkill" data-skill="{{this.slug}}" />
             <span class="rka-skill-label">{{this.label}}</span>
             <span class="rka-likelihood-badge">{{localize (concat "RKA.Likelihood." this.likelihood)}}</span>
+          </label>
+        {{/each}}
+        {{#each lores}}
+          <label class="rka-skill-option rka-lore-option rka-likelihood-gmDecides {{#if this.selected}}selected{{/if}} {{#if this.disabled}}disabled{{/if}}"
+                 {{#if this.disabled}}data-tooltip="{{localize "RKA.Dialog.LoreNeedsGm"}}"{{/if}}>
+            <input type="radio" name="skill" value="{{this.slug}}" {{#if this.selected}}checked{{/if}}
+                   {{#if this.inputDisabled}}disabled{{/if}}
+                   data-action="selectSkill" data-skill="{{this.slug}}" />
+            <span class="rka-skill-label">{{this.label}}</span>
+            <span class="rka-likelihood-badge">{{localize "RKA.Likelihood.gmDecides"}}</span>
           </label>
         {{/each}}
       </div>
     </section>
 
     <footer class="rka-actions">
-      <button type="button" data-action="rollSkill" {{#unless canRoll}}disabled{{/unless}}>
-        {{localize "RKA.Dialog.RollButton"}}
-      </button>
+      {{#if waitingForGm}}
+        <p class="rka-waiting">{{localize "RKA.Dialog.WaitingForGm"}}</p>
+        <button type="button" data-action="cancelLore">{{localize "RKA.Dialog.Cancel"}}</button>
+      {{else}}
+        <button type="button" data-action="rollSkill" {{#unless canRoll}}disabled{{/unless}}>
+          {{localize "RKA.Dialog.RollButton"}}
+        </button>
+      {{/if}}
     </footer>
   {{/if}}
 </div>

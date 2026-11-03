@@ -15,6 +15,9 @@ const TEMPLATE_PATH = `modules/${MODULE_ID}/templates/chat-result.hbs`;
  * make an already-known identity look forgotten. The identity reveal
  * itself happens via the baseline text ("X is a Y."), not the header.
  *
+ * A Lore roll (`loreEase` set) says so in the GM-only message, with the
+ * ease the GM chose; the player's card never mentions it (SPEC.md §6.8).
+ *
  * @param {{reveal: import("../reveal.js").Reveal}} args
  */
 export async function renderResultChatMessage({
@@ -25,6 +28,7 @@ export async function renderResultChatMessage({
   targetActor,
   alreadyIdentified,
   reveal,
+  loreEase,
 }) {
   const headerName =
     IDENTIFYING_DEGREES.has(degree) || alreadyIdentified
@@ -51,10 +55,14 @@ export async function renderResultChatMessage({
 
   await ChatMessage.create({ speaker, content });
 
+  const loreNote = loreEase
+    ? `<p>${game.i18n.format("RKA.Chat.GmLoreNote", { ease: game.i18n.localize(`RKA.Lore.Ease.${loreEase}`) })}</p>`
+    : "";
   const gmContent = `
     <div class="rka-gm-detail">
       <strong>${game.i18n.localize("RKA.Chat.GmDetailTitle")}</strong>
       <p>${targetActor.name} — DC ${dc} — Roll ${rollTotal} — ${game.i18n.localize(`RKA.Degree.${degree}`)}</p>
+      ${loreNote}
     </div>
   `;
   await ChatMessage.create({

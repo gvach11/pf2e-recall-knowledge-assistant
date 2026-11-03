@@ -10,7 +10,10 @@
       "CategoryHeading": "What are you trying to recall?",
       "SkillHeading": "Choose a skill",
       "RollButton": "Roll",
-      "NoSkills": "None of your skills seem relevant to this."
+      "NoSkills": "None of your skills seem relevant to this.",
+      "WaitingForGm": "Waiting for the GM…",
+      "Cancel": "Cancel",
+      "LoreNeedsGm": "A GM must be connected to rule on Lore."
     },
     "Category": {
       "weaknesses": "Weaknesses",
@@ -20,7 +23,8 @@
     "Likelihood": {
       "confident": "Confident",
       "uncertain": "Uncertain",
-      "unfamiliar": "Unfamiliar"
+      "unfamiliar": "Unfamiliar",
+      "gmDecides": "GM decides"
     },
     "Degree": {
       "criticalSuccess": "Critical Success",
@@ -33,7 +37,8 @@
       "Baseline": "{name} is {article} {trait}.",
       "GmDetailTitle": "Recall Knowledge (GM only)",
       "NothingNotable": "Nothing notable in that regard.",
-      "NothingRecalled": "You recall nothing certain."
+      "NothingRecalled": "You recall nothing certain.",
+      "GmLoreNote": "Lore roll — GM ruled it {ease}."
     },
     "Warning": {
       "NoTarget": "Target exactly one creature or hazard first.",
@@ -52,7 +57,13 @@
       "PopupBody": "{character} wants to use {lore} to recall {category} about {target}.",
       "Decline": "Decline",
       "Easy": "Easy (DC {dc})",
-      "VeryEasy": "Very easy (DC {dc})"
+      "VeryEasy": "Very easy (DC {dc})",
+      "Ease": {
+        "easy": "easy",
+        "very-easy": "very easy"
+      },
+      "Declined": "The GM ruled that {lore} doesn't help here.",
+      "GmUnavailable": "The GM is no longer available to rule on your Lore."
     }
   }
 }

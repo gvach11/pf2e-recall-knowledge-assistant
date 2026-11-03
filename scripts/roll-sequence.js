@@ -13,7 +13,9 @@ import { renderResultChatMessage } from "./chat/render-result.js";
  *
  * `dc` is computed once by the caller and passed in rather than recomputed
  * here, so there's a single source of truth for "the current DC" within one
- * roll cycle (see architecture report F13).
+ * roll cycle (see architecture report F13). For a Lore roll that's the DC
+ * the GM's ruling gave, and `loreEase` is that ruling (SPEC.md §6.8);
+ * it's undefined for every other skill.
  */
 export async function executeRollSequence({
   combat,
@@ -24,6 +26,7 @@ export async function executeRollSequence({
   selectedSkill,
   selectedCategory,
   event,
+  loreEase,
 }) {
   const actorUuid = rollingActor.uuid;
   const targetUuid = targetActor.uuid;
@@ -64,6 +67,7 @@ export async function executeRollSequence({
       targetActor,
       alreadyIdentified,
       reveal,
+      loreEase,
     });
 
     await persistAttempt(combat, actorUuid, targetUuid, degree, reveal.revealedKeys);
