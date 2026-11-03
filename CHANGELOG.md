@@ -4,6 +4,17 @@ All notable changes to **PF2e Recall Knowledge Assistant** are documented here.
 
 ---
 
+## [1.2.0] — 2026-11-03
+
+### Harder follow-ups (RAW)
+- Each further Recall Knowledge attempt by a character against the same target in an encounter is harder: hard (+2), then very hard (+5), then incredibly hard (+10), per GM Core pg. 54
+- After the incredibly hard attempt, that character can't try again on that target until the encounter ends, just as after a failure
+- Lore rolls climb the same way from the easy or very easy DC the GM chose; the GM's popup shows the raised DCs
+- The dialog tells the player a follow-up is harder, never by how much; the GM-only detail message names the step
+- New world setting **Harder follow-up attempts**, on by default. Turn it off to keep the 1.1 behavior: every attempt at the normal DC until a failure
+
+---
+
 ## [1.1.0] — 2026-11-03
 
 ### Lore skills
