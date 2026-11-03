@@ -55,6 +55,10 @@ info-dump.
   Celestial → Religion, etc. Some creatures are identifiable by more than one
   skill; Lore skills specific to the creature type always apply.
 
+- **Lore DCs**: an applicable Lore uses an easier DC than the standard one —
+  **easy** or **very easy**, at the GM's discretion. pf2e computes both on
+  NPCs (`identificationDCs.lore`), rarity included. RKA's handling is §6.8.
+
 ## 3. Technical Foundation (pf2e system / Foundry API)
 
 - The pf2e system already ships a built-in Recall Knowledge action usable as:
@@ -114,7 +118,9 @@ info-dump.
   bonus reveal), **randomly pick one of the other relevant categories** to
   reveal instead, so a critical success always yields something useful.
 - **GM approval**: **Fully automatic reveal** — no GM-gated approval step in
-  v1.
+  v1. The one GM step is *before* a Lore roll, deciding whether that Lore
+  applies and how easy it is (§6.8); the reveal after any roll stays
+  automatic.
 - **Roll execution**: Use the pf2e system's built-in Recall Knowledge action
   to roll (for correct, up-to-date bonus math), but never let it post its
   own chat card or receive the DC. We read back the raw roll total, compare
@@ -170,6 +176,13 @@ info-dump.
 - As a **player**, on a critical failure I want to be told something
   confident-sounding but wrong, so bad rolls carry a real risk instead of
   just "nothing happens."
+- As a **player** with a Lore skill (including a custom one), I want to try
+  it against a target and have the GM rule on whether it applies, so my
+  character's specialist knowledge counts without me arguing the case out
+  of game.
+- As a **GM**, when a player tries a Lore, I want a quick popup to decline it
+  or allow it at an easy or very easy DC, so I adjudicate in one click and
+  the roll then runs as normal.
 - As a **GM**, I want some way to keep the module from spoiling a homebrew
   NPC's twist. In v1, the only control I have is what I put in an NPC's
   Weakness/Resistance/Immunity/Trait fields — reveal itself is automatic,
@@ -188,8 +201,8 @@ info-dump.
   first") instead of opening the dialog.
 
 ### 6.2 Dialog Contents
-- List of skills relevant to the target (derived from its traits, plus any
-  Lore skills the target's type suggests). The **DC is never shown
+- List of skills relevant to the target (derived from its traits), followed
+  by every Lore skill the character has, which the GM rules on (§6.8). The **DC is never shown
   explicitly** — showing a raw number invites metagaming (comparing it to
   known creature stat blocks) instead of an in-fiction guess. Each skill
   instead shows a qualitative **likelihood** label, computed from the
@@ -270,7 +283,8 @@ info-dump.
 ### 6.5 GM Visibility & Control
 - Reveal is **fully automatic** — no GM approval step in the reveal flow
   (§4). The roll happens and the dialog resolves immediately for the
-  player.
+  player. (A Lore roll needs the GM's go-ahead *before* it is rolled,
+  §6.8; once rolled, it resolves the same way.)
 - GM should still be able to see the true roll and true result regardless
   of outcome (e.g., a GM-only chat flavor line, or a toggle for "blind GM").
 - No per-NPC override/blacklist in v1 — deferred (§8 Out of Scope).
@@ -282,6 +296,14 @@ info-dump.
   when that combat ends). No throttling outside of an active encounter.
   Keyed by the acting character, not the Foundry user/login, so a player
   controlling multiple PCs gets independent throttling per character.
+- **Which encounter**: the started combat the **target** is a combatant
+  in (matched by the target's actor uuid, the same key attempts use) — not
+  whichever combat a user's tracker happens to show. A target that isn't in
+  any started combat is "outside an encounter": no throttling, nothing
+  recorded. If several started combats contain the target, prefer the one
+  the tracker shows (`game.combat`), otherwise the first found. This keeps a
+  forgotten old encounter from catching rolls meant for a different fight
+  or made outside combat.
 - Concrete policy: block further attempts against that target for the rest
   of the encounter after any **failure or critical failure**. This is the
   module's interpretation of the RAW guidance ("once failed or DC is very
@@ -350,12 +372,111 @@ targets therefore lets a player infer that a Success-looking result was a
 lie, as reopening the dialog already does. Kept deliberately to follow RAW.
 
 **Known limitations (accepted):**
-- *Several started combats.* Records live in, and are read from, the combat
-  the user's tracker shows (`game.combat`), which may not be the combat whose
-  turn just changed. One encounter at a time is normal play.
 - *Unlinked PC tokens.* Records are keyed by the rolling actor's uuid; an
   unlinked PC token has its own actor, so it and the assigned character keep
   separate records. Unlinked PC tokens are a pf2e setup mistake.
+
+### 6.8 Lore Skills (GM-approved)
+Whether a Lore applies to a target is a GM ruling (RAW), and custom Lores
+("Gravedigger Lore", "Lore of House Varn") can't be matched to traits by
+code. So RKA doesn't guess: every Lore goes to the GM, who declines it or
+allows it at one of pf2e's two Lore DCs (§2). After an approval the roll
+behaves exactly like any other skill's.
+
+**Player dialog**
+- Below the regular skills, list **every Lore skill the character has**
+  (pf2e lore statistics, any rank), labelled **"GM decides"** in place of a
+  likelihood. No likelihood is computed for Lores, and Lores are never
+  pulled into the regular list even if pf2e names them for a target.
+- Choosing a Lore and pressing Roll **does not roll**. It sends a request to
+  the active GM and puts the dialog in a **waiting** state: "Waiting for the
+  GM…" with a **Cancel** button; the skill, category and Roll controls are
+  disabled until the wait ends.
+- The usual repeat-attempt block (§6.6) applies before asking: a blocked
+  character can't send a Lore request either.
+- **No active GM**: Lore entries are shown but disabled, with a tooltip
+  saying a GM must be connected to rule on Lore.
+
+**GM popup**
+- Opens on the **active GM's** client only (`game.users.activeGM`). It
+  shows the character's name, the Lore, the category being asked about,
+  and the target's **real** name and token art (the GM sees all of it
+  anyway).
+- Three buttons: **Decline**, **Easy (DC X)**, **Very easy (DC Y)**. The GM
+  sees the numbers; the player never does.
+- Closing the popup without choosing counts as **Decline**.
+- Each request gets its own popup; two players asking at once get two.
+
+**DCs**
+- NPCs: read from pf2e's `identificationDCs.lore` (easy first, very easy
+  second), the same live getter the standard DC comes from (§3).
+- Hazards: pf2e doesn't compute these, so RKA mirrors pf2e's rule —
+  rarity and ease are combined as steps on pf2e's DC-adjustment scale
+  (incredibly easy −10, very easy −5, easy −2, normal 0, hard +2, very hard
+  +5, incredibly hard +10), clamped to its ends, then applied to the level
+  DC. E.g. a rare hazard's easy Lore DC is level DC +2, not +5−2.
+- The GM's reply names the ease (`easy` / `very-easy`), not a number; the
+  player's client computes the DC itself, as it already does for the
+  standard DC.
+
+**Outcomes**
+- **Allowed**: the dialog leaves the waiting state and the roll runs
+  exactly as for any other skill (§6.3–§6.6), against the chosen DC: same
+  reveal, chat card, attempt record and block-on-failure. The GM-only chat
+  detail notes that it was a Lore roll and which ease was chosen.
+- **Declined**: the player is told the GM ruled that this Lore doesn't help
+  here, and the dialog returns to normal. **A decline doesn't count as an
+  attempt** — nothing was rolled, so nothing is recorded and the player can
+  pick another skill.
+- **Approval doesn't carry over**: every Lore roll asks again, even for the
+  same Lore and target later in the encounter.
+- **Cancelled** (player presses Cancel or closes the dialog): the GM's
+  popup for that request closes, and nothing is recorded.
+- **GM disconnects** while a request is waiting (or the active GM changes):
+  the wait ends as if cancelled, and the player is told the GM is no
+  longer available.
+- If the player then cancels pf2e's own Check Modifiers dialog, it's the
+  existing "cancelled" outcome: nothing recorded, and the next Lore roll
+  asks again.
+
+**GM rolling for a character**: when the requester is the active GM
+(e.g. through `openDialog({ actor })`, §6.7), there's no round trip: the
+same Decline / Easy / Very easy choice is shown locally and the roll
+follows.
+
+**Messages and trust** (same socket and checks as the attempt relay):
+- Request (player → GM): request id, rolling actor, target actor and
+  target token (the token is what the popup's art comes from), Lore slug,
+  category. The GM acts only if the sender owns the rolling actor and it
+  has that Lore; a request that fails these checks is dropped silently
+  (the player can still Cancel).
+- Reply (GM → player): request id and decision. The player's client acts
+  only on a reply for the request it's waiting on, from the user who is
+  currently the active GM. Stale or unknown ids are ignored.
+- Cancel (player → GM): request id; closes that popup.
+
+**Unchanged**: the public API (§6.7) — `getAttemptStatus` and `apiVersion`
+are unaffected, since what's left to learn doesn't depend on which skill is
+used.
+
+**Designer's calls** (not discussed with the user; easy to revisit):
+- The player is never told which ease the GM picked, only that the Lore
+  was allowed — the ease is a near-direct DC hint.
+- The dialog redraws its Lore entries live when a GM connects or
+  disconnects, so they enable/disable without reopening.
+- After an approval, the original Roll click is passed on to pf2e as for
+  any skill, so modifier keys (e.g. skipping the Check Modifiers dialog)
+  still work.
+- The socket handler currently acts only on the active GM's client;
+  replies and cancels need routing to the right client. How is left to
+  the builder.
+
+**Verified against pf2e** (installed system source, 2026-11-03):
+`identificationDCs.lore` is `[easy, very-easy]`, and pf2e combines rarity
+and ease by adding their positions on the 7-step scale (normal at the
+middle) and clamping, which is the hazard rule above. **To confirm live
+while building**: the built-in recall-knowledge action accepts a Lore
+statistic slug (e.g. `undead-lore`) as `statistic`.
 
 ## 7. Open Questions
 
