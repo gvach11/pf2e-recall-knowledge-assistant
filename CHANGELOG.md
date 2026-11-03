@@ -4,6 +4,20 @@ All notable changes to **PF2e Recall Knowledge Assistant** are documented here.
 
 ---
 
+## [1.1.0] — 2026-11-03
+
+### Lore skills
+- Every Lore your character has is listed in the dialog as "GM decides", custom Lores included
+- Rolling a Lore asks the active GM, who declines it or allows it at an easy or very easy DC; the roll then resolves like any other skill
+- A decline costs nothing: the dialog stays open and no attempt is recorded
+- The player can cancel while waiting; if the GM leaves, the wait ends with a notice
+- The GM-only detail message notes a Lore roll and the ease the GM chose
+
+### Fixes
+- Attempts are remembered on the encounter the target is in, not whichever encounter the tracker shows, so an old encounter left running no longer blocks or remembers rolls from another fight or from outside combat
+
+---
+
 ## [1.0.0] — 2026-11-02
 
 First stable release.

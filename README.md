@@ -17,8 +17,9 @@ Found something odd? Please report it on the [issue tracker](https://github.com/
   - **Success**: the creature's identity plus one fact in the chosen category (or "nothing notable in that regard")
   - **Failure**: nothing certain
   - **Critical Failure**: once you've identified the creature, a believable false fact that never contradicts what you already know; before that, the same as a Failure
+- **Lore skills, ruled on by the GM**: every Lore your character has is listed as "GM decides". Rolling one asks the GM, who declines it or allows it at an easy or very easy DC; the roll then works like any other. A decline costs nothing, so you can pick another skill
 - **Identity stays hidden** until earned: the dialog and failed results say "Unknown Creature" / "Unknown Hazard"
-- **Repeat attempts**: in a started encounter, a Failure or Critical Failure blocks that character from trying again on that target until the encounter ends. Tracked per character, not per player
+- **Repeat attempts**: in the started encounter the target is part of, a Failure or Critical Failure blocks that character from trying again on that target until the encounter ends. Tracked per character, not per player
 - **Hazards supported**, with hazard-appropriate skills
 - **GM-only detail message** showing the real target name, DC, roll total, and degree
 
