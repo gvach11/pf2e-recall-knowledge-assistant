@@ -46,6 +46,13 @@
     },
     "Error": {
       "RollFailed": "The Recall Knowledge roll couldn't be completed."
+    },
+    "Lore": {
+      "PopupTitle": "Lore check",
+      "PopupBody": "{character} wants to use {lore} to recall {category} about {target}.",
+      "Decline": "Decline",
+      "Easy": "Easy (DC {dc})",
+      "VeryEasy": "Very easy (DC {dc})"
     }
   }
 }

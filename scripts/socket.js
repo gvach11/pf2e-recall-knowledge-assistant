@@ -1,7 +1,8 @@
-import { DEGREES, MODULE_ID } from "./constants.js";
+import { DEGREES, MODULE_ID, SOCKET_NAME } from "./constants.js";
 import { recordAttempt } from "./repeat-attempts.js";
+import { LORE_MESSAGES, handleLoreCancel, handleLoreReply, handleLoreRequest } from "./lore-approval.js";
 
-export const SOCKET_NAME = `module.${MODULE_ID}`;
+export { SOCKET_NAME };
 const RECORD_ATTEMPT = "recordAttempt";
 const VALID_DEGREES = new Set(Object.values(DEGREES));
 
@@ -42,12 +43,17 @@ export async function persistAttempt(combat, actorUuid, targetUuid, degree, newR
 }
 
 /**
- * Runs on every client, but only the active GM acts — exactly one writer.
- * The payload comes from another client, so it's validated before use, and
- * a sender may only record attempts for an actor they own.
+ * Runs on every client. A Lore reply is for the player who asked, so every
+ * client hands it on (lore-approval.js checks it's theirs). Everything else
+ * is for the active GM only — exactly one writer, one popup. The payload
+ * comes from another client, so it's validated before use, and a sender may
+ * only record attempts for an actor they own.
  */
 export async function handleSocketMessage(message, senderId) {
+  if (message?.type === LORE_MESSAGES.REPLY) return handleLoreReply(message, senderId);
   if (!game.users.activeGM?.isSelf) return;
+  if (message?.type === LORE_MESSAGES.REQUEST) return handleLoreRequest(message, senderId);
+  if (message?.type === LORE_MESSAGES.CANCEL) return handleLoreCancel(message, senderId);
   if (message?.type !== RECORD_ATTEMPT) return;
 
   const { combatId, actorUuid, targetUuid, degree, newRevealedKeys } = message;

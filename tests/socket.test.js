@@ -3,6 +3,14 @@ import { persistAttempt, handleSocketMessage, registerSocket, SOCKET_NAME } from
 import { isAttemptBlocked, isIdentified } from "../scripts/repeat-attempts.js";
 import { DEGREES } from "../scripts/constants.js";
 import { createFakeCombat } from "./helpers/fake-combat.js";
+import { LORE_MESSAGES, handleLoreCancel, handleLoreReply, handleLoreRequest } from "../scripts/lore-approval.js";
+
+vi.mock("../scripts/lore-approval.js", async (importOriginal) => ({
+  ...(await importOriginal()),
+  handleLoreRequest: vi.fn(),
+  handleLoreReply: vi.fn(),
+  handleLoreCancel: vi.fn(),
+}));
 
 const PC = "Actor.pc1";
 const TARGET = "Scene.s1.Token.t1.Actor.npc1";
@@ -34,6 +42,7 @@ function message(overrides = {}) {
 
 afterEach(() => {
   vi.unstubAllGlobals();
+  vi.clearAllMocks();
 });
 
 describe("persistAttempt", () => {
@@ -116,6 +125,34 @@ describe("handleSocketMessage", () => {
     await handleSocketMessage(message({ newRevealedKeys: [{ injected: true }] }), SENDER.id);
 
     expect(combat.getFlag("pf2e-recall-knowledge-assistant", "attempts")).toBeUndefined();
+  });
+});
+
+describe("handleSocketMessage — Lore messages", () => {
+  it("routes a Lore reply on a player's client", async () => {
+    stubGame({ activeGM: { isSelf: false } });
+    const reply = { type: LORE_MESSAGES.REPLY, requestId: "r1", userId: "player1", decision: "easy" };
+
+    await handleSocketMessage(reply, "gm1");
+
+    expect(handleLoreReply).toHaveBeenCalledWith(reply, "gm1");
+  });
+
+  it("routes Lore requests and cancels on the active GM only", async () => {
+    const request = { type: LORE_MESSAGES.REQUEST, requestId: "r1" };
+    const cancel = { type: LORE_MESSAGES.CANCEL, requestId: "r1" };
+
+    stubGame({ activeGM: { isSelf: false } });
+    await handleSocketMessage(request, SENDER.id);
+    await handleSocketMessage(cancel, SENDER.id);
+    expect(handleLoreRequest).not.toHaveBeenCalled();
+    expect(handleLoreCancel).not.toHaveBeenCalled();
+
+    stubGame({ isGM: true, activeGM: { isSelf: true } });
+    await handleSocketMessage(request, SENDER.id);
+    await handleSocketMessage(cancel, SENDER.id);
+    expect(handleLoreRequest).toHaveBeenCalledWith(request, SENDER.id);
+    expect(handleLoreCancel).toHaveBeenCalledWith(cancel, SENDER.id);
   });
 });
 
